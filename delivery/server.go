@@ -16,12 +16,15 @@ import (
 
 type Server struct {
 	scheduleUC usecase.ShecdulesUseCase
+	userUC usecase.UserUsecase
 	engine     *gin.Engine
 	host       string
 }
 
 func (s *Server) initRoute() {
+	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
+	controller.NewUserController(s.userUC, rg).Route()
 	controller.NewSchedulesController(s.scheduleUC, rg).Route()
 }
 
@@ -37,6 +40,7 @@ func NewServer() *Server {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println("Welcome to the Instructor Led App!")
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database)
 
@@ -57,12 +61,15 @@ func NewServer() *Server {
 
 	schedulesRepository := repository.NewSchedulesRepository(db)
 	schedulesUseCase := usecase.NewSchedulesUseCase(schedulesRepository)
+	userRepository := repository.NewUserRepository(db)
+	userUseCase := usecase.NewUserUsecase(userRepository)
 
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
 	return &Server{
 		scheduleUC: schedulesUseCase,
+		userUC: userUseCase,
 		engine:     engine,
 		host:       host,
 	}

@@ -11,12 +11,12 @@ type ShecdulesUseCase interface {
 }
 
 type schedulesUseCase struct {
-	participantRepository repository.ParticipantRepository
+	scheduleRepository repository.ScheduleRepository
 }
 
 // FindAllScheduleUC implements ShecdulesUseCase.
 func (s *schedulesUseCase) FindAllScheduleUC(page int, size int) ([]model.Schedule, sharedmodel.Paging, error) {
-	users, paging, err := s.participantRepository.ListScheduled(page, size)
+	users, paging, err := s.scheduleRepository.ListScheduled(page, size)
 	if err != nil {
 		return nil, sharedmodel.Paging{}, err
 	}
@@ -25,6 +25,6 @@ func (s *schedulesUseCase) FindAllScheduleUC(page int, size int) ([]model.Schedu
 
 // FindAllSchedule implements ParticipantUseCase.
 
-func NewSchedulesUseCase(participantRepository repository.ParticipantRepository) ShecdulesUseCase {
-	return &schedulesUseCase{participantRepository}
+func NewSchedulesUseCase(scheduleRepository repository.ScheduleRepository) ShecdulesUseCase {
+	return &schedulesUseCase{scheduleRepository}
 }

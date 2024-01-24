@@ -10,16 +10,16 @@ import (
 	sharedmodel "enigmaCamp.com/instructor_led/shared/shared_model"
 )
 
-type ParticipantRepository interface {
+type ScheduleRepository interface {
 	ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error)
 }
 
-type participantRepository struct {
+type scheduleRepository struct {
 	db *sql.DB
 }
 
 // List implements ParticipantRepository.
-func (p *participantRepository) ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error) {
+func (p *scheduleRepository) ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error) {
 	var schedules []model.Schedule
 	offset := (page - 1) * size
 	query := config.SelectSchedulePagination
@@ -42,7 +42,7 @@ func (p *participantRepository) ListScheduled(page int, size int) ([]model.Sched
 	}
 
 	totalRows := 0
-	if err := p.db.QueryRow("SELECT COUNT(*) FROM users").Scan(&totalRows); err != nil {
+	if err := p.db.QueryRow("SELECT COUNT(*) FROM schedules").Scan(&totalRows); err != nil {
 		return nil, sharedmodel.Paging{}, err
 	}
 
@@ -55,8 +55,8 @@ func (p *participantRepository) ListScheduled(page int, size int) ([]model.Sched
 	return schedules, paging, nil
 }
 
-func NewSchedulesRepository(db *sql.DB) ParticipantRepository {
-	return &participantRepository{
+func NewSchedulesRepository(db *sql.DB) ScheduleRepository {
+	return &scheduleRepository{
 		db: db,
 	}
 }

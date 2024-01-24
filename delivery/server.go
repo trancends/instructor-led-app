@@ -15,7 +15,7 @@ import (
 )
 
 type Server struct {
-	scheduleUC usecase.ParticipantUseCase
+	scheduleUC usecase.ShecdulesUseCase
 	engine     *gin.Engine
 	host       string
 }
@@ -37,7 +37,7 @@ func NewServer() *Server {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Welcome to the Todo APP")
+	fmt.Println("Welcome to the Instructor Led App!")
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database)
 
 	db, err := sql.Open(cfg.Driver, psqlInfo)

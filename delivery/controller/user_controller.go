@@ -27,6 +27,10 @@ func (u *UserController) Route() {
 }
 
 func (u *UserController) CreateUserHanlder(c *gin.Context) {
+	csv := c.Query("csv")
+	if csv != "" {
+		return
+	}
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		log.Println("invalid json at CreateUserHanlder")
@@ -39,6 +43,7 @@ func (u *UserController) CreateUserHanlder(c *gin.Context) {
 		return
 	}
 
+	log.Println("calling user usecase CreateUser")
 	err := u.userUC.CreateUser(user)
 	if err != nil {
 		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to create user"+err.Error())

@@ -21,8 +21,9 @@ type Server struct {
 }
 
 func (s *Server) initRoute() {
+	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
-	controller.NewUserController(s.userUC, rg)
+	controller.NewUserController(s.userUC, rg).Route()
 }
 
 func (s *Server) Run() {

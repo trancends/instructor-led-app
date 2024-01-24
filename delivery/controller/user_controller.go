@@ -12,10 +12,10 @@ import (
 
 type UserController struct {
 	userUC usecase.UserUsecase
-	rg     gin.RouterGroup
+	rg     *gin.RouterGroup
 }
 
-func NewUserController(rg gin.RouterGroup, userUC usecase.UserUsecase) *UserController {
+func NewUserController(userUC usecase.UserUsecase, rg *gin.RouterGroup) *UserController {
 	return &UserController{
 		userUC: userUC,
 		rg:     rg,

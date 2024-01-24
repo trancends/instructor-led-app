@@ -22,8 +22,7 @@ func NewUserUsecase(userRepository repository.UserRepository) UserUsecase {
 }
 
 func (u *userUsecase) CreateUser(payload model.User) error {
-	log.Println("user usecase CreateUser")
-
+	log.Println("calling user repo Create")
 	err := u.userRepository.Create(payload)
 	if err != nil {
 		return err

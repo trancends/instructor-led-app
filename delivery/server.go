@@ -7,7 +7,7 @@ import (
 
 	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/delivery/controller"
-	"enigmaCamp.com/instructor_led/repository"
+	repository "enigmaCamp.com/instructor_led/repository"
 	"enigmaCamp.com/instructor_led/usecase"
 	_ "github.com/lib/pq"
 
@@ -15,15 +15,17 @@ import (
 )
 
 type Server struct {
+	scheduleUC usecase.ShecdulesUseCase
 	userUC usecase.UserUsecase
-	engine *gin.Engine
-	host   string
+	engine     *gin.Engine
+	host       string
 }
 
 func (s *Server) initRoute() {
 	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
 	controller.NewUserController(s.userUC, rg).Route()
+	controller.NewSchedulesController(s.scheduleUC, rg).Route()
 }
 
 func (s *Server) Run() {
@@ -38,7 +40,8 @@ func NewServer() *Server {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Welcome to the Todo APP")
+
+	fmt.Println("Welcome to the Instructor Led App!")
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Database)
 
 	db, err := sql.Open(cfg.Driver, psqlInfo)
@@ -56,6 +59,8 @@ func NewServer() *Server {
 		log.Fatal(fmt.Errorf("config error: %v", err))
 	}
 
+	schedulesRepository := repository.NewSchedulesRepository(db)
+	schedulesUseCase := usecase.NewSchedulesUseCase(schedulesRepository)
 	userRepository := repository.NewUserRepository(db)
 	userUseCase := usecase.NewUserUsecase(userRepository)
 
@@ -63,8 +68,9 @@ func NewServer() *Server {
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
 	return &Server{
+		scheduleUC: schedulesUseCase,
 		userUC: userUseCase,
-		engine: engine,
-		host:   host,
+		engine:     engine,
+		host:       host,
 	}
 }

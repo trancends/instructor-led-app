@@ -21,6 +21,7 @@ func NewAttandanceController(rg *gin.RouterGroup, attendanceUC usecase.Attendanc
 
 func (a *AttandanceController) Route() {
 	a.rg.GET("/attendance", a.GetAllAttendanceHandler)
+	a.rg.GET("/attendance/:id", a.GetAttendanceByID)
 }
 
 func (a *AttandanceController) GetAllAttendanceHandler(c *gin.Context) {
@@ -33,4 +34,14 @@ func (a *AttandanceController) GetAllAttendanceHandler(c *gin.Context) {
 
 	// Respond with the retrieved data
 	c.JSON(http.StatusOK, gin.H{"attendance": attendanceList})
+
+}
+func (a *AttandanceController) GetAttendanceByID(c *gin.Context) {
+	id := c.Param("id")
+	attendance, err := a.attendanceUC.GetAttendance(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve attendance"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"attendance": attendance})
 }

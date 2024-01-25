@@ -19,8 +19,31 @@ type attendanceRepository struct {
 }
 
 // Get implements AttendanceRepository.
-func (*attendanceRepository) Get(id string) (model.Attendance, error) {
-	panic("unimplemented")
+func (a *attendanceRepository) Get(id string) (model.Attendance, error) {
+	var attendance model.Attendance
+
+	// Execute the SQL query
+	row := a.db.QueryRow(`
+		SELECT id, user_id, schedule_id, created_at, updated_at, deleted_at
+		FROM attendances
+		WHERE id = $1
+	`, id)
+
+	// Scan the result into the attendance struct
+	err := row.Scan(
+		&attendance.ID,
+		&attendance.UserID,
+		&attendance.ScheduleID,
+		&attendance.CreatedAt,
+		&attendance.UpdatedAt,
+		&attendance.DeletedAt,
+	)
+	if err != nil {
+		log.Println(err)
+		return model.Attendance{}, err
+	}
+
+	return attendance, nil
 }
 
 // Post implements AttendanceRepository.

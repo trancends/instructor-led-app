@@ -77,7 +77,7 @@ func (a *attendanceRepository) Create(user_id string, schedule_id string) (model
 	var attendance model.Attendance
 
 	// Validate UUIDs
-	
+
 	attendance.UserID = user_id
 	attendance.ScheduleID = schedule_id
 	err := a.db.QueryRow(`
@@ -87,7 +87,6 @@ func (a *attendanceRepository) Create(user_id string, schedule_id string) (model
 	`, user_id, schedule_id).Scan(
 		&attendance.ID,
 	)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return model.Attendance{}, fmt.Errorf("no rows returned, record may not be inserted")

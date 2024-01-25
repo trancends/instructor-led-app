@@ -36,8 +36,8 @@ func (a *AttandanceController) GetAllAttendanceHandler(c *gin.Context) {
 
 	// Respond with the retrieved data
 	c.JSON(http.StatusOK, gin.H{"attendance": attendanceList})
-
 }
+
 func (a *AttandanceController) GetAttendanceByID(c *gin.Context) {
 	id := c.Param("id")
 	attendance, err := a.attendanceUC.GetAttendance(id)
@@ -47,6 +47,7 @@ func (a *AttandanceController) GetAttendanceByID(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"attendance": attendance})
 }
+
 func (a *AttandanceController) AddAttendanceHandler(c *gin.Context) {
 	var attendance model.Attendance
 	if err := c.ShouldBindJSON(&attendance); err != nil {

@@ -3,6 +3,8 @@ package controller
 import (
 	"log"
 	"net/http"
+	"net/mail"
+	"strconv"
 
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
@@ -50,4 +52,47 @@ func (u *UserController) CreateUserHanlder(c *gin.Context) {
 		return
 	}
 	common.SendSingleResponse(c, nil, "user created successfully")
+}
+
+func (u *UserController) GetAllUserHandler(c *gin.Context) {
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid page"+err.Error())
+		return
+	}
+	size, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid size"+err.Error())
+		return
+	}
+	if page == 0 {
+		page = 1
+	}
+	if size == 0 {
+		size = 10
+	}
+	log.Println("calling user usecase ListAllUsers")
+	users, paging, err := u.userUC.ListAllUsers(page, size)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	common.SendPagedResponse(c, users, paging, "success")
+}
+
+func (u *UserController) GetUserByEmailHandler(c *gin.Context) {
+	userEmail := c.Param("email")
+	_, err := mail.ParseAddress(userEmail)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid email"+err.Error())
+		return
+	}
+	log.Println("calling user usecase GetUserByEmail")
+	user, err := u.userUC.GetUserByEmail(userEmail)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "user not found"+err.Error())
+		return
+	}
+
+	common.SendSingleResponse(c, user, "success")
 }

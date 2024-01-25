@@ -27,8 +27,8 @@ func (u *userRepository) Create(payload model.User) error {
 	var err error
 	user := payload
 	currTime := time.Now().Local()
-	payload.CreatedAt = currTime
-	payload.UpdatedAt = currTime
+	user.CreatedAt = currTime
+	user.UpdatedAt = currTime
 
 	err = u.db.QueryRow(config.InsertUser, user.Name, user.Email, user.Password, user.Role, user.CreatedAt, user.UpdatedAt).Scan(&user.ID)
 	if err != nil {

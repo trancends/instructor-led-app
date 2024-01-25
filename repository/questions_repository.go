@@ -10,11 +10,43 @@ import (
 
 type QuestionsRepository interface {
 	Get(date string) ([]*model.Schedule, error)
-	//List() ([]model.Question, error)
+	List() ([]model.Question, error)
 }
 
 type questionsRepository struct {
 	db *sql.DB
+}
+
+// List implements QuestionsRepository.
+func (q *questionsRepository) List() ([]model.Question, error) {
+	rows, err := q.db.Query("SELECT id, description, status FROM questions")
+	if err != nil {
+		log.Println("Error retrieving questions:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var questions []model.Question
+
+	for rows.Next() {
+		var question model.Question
+		err := rows.Scan(&question.ID,
+			&question.Description,
+			&question.Status)
+		if err != nil {
+			log.Println("Error scanning question row:", err)
+			return nil, err
+		}
+
+		questions = append(questions, question)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Error iterating over question rows:", err)
+		return nil, err
+	}
+
+	return questions, nil
 }
 
 // Get implements QuestionsRepository.
@@ -64,7 +96,6 @@ func (q *questionsRepository) Get(date string) ([]*model.Schedule, error) {
 			return nil, err
 		}
 
-		// Check if schedule already exists in ScheduleSlice
 		var found bool
 		for _, existingSchedule := range ScheduleSlice {
 			if existingSchedule.ID == schedule.ID {
@@ -83,11 +114,6 @@ func (q *questionsRepository) Get(date string) ([]*model.Schedule, error) {
 
 	return ScheduleSlice, nil
 }
-
-// List implements QuestionsRepository.
-// func (q *questionsRepository) List() ([]model.Question, error) {
-// 	// Implementasi List tetap sama seperti sebelumnya
-// }
 
 func NewQuestionsRepository(db *sql.DB) QuestionsRepository {
 	return &questionsRepository{

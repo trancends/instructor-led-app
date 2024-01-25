@@ -10,7 +10,7 @@ import (
 
 type QuestionsUsecase interface {
 	GetQuestion(date string) ([]*model.Schedule, error)
-	//ListQuestions() ([]model.Question, error)
+	ListQuestions() ([]model.Question, error)
 }
 
 type questionsUsecase struct {
@@ -34,12 +34,11 @@ func (u *questionsUsecase) GetQuestion(date string) ([]*model.Schedule, error) {
 	return schedules, nil
 }
 
-// ListQuestions returns a list of questions.
-// func (u *questionsUsecase) ListQuestions() ([]model.Question, error) {
-// 	questions, err := u.questionsRepo.List()
-// 	if err != nil {
-// 		log.Println("QuestionsUsecase.ListQuestions:", err.Error())
-// 		return nil, err
-// 	}
-// 	return questions, nil
-// }
+func (u *questionsUsecase) ListQuestions() ([]model.Question, error) {
+	questions, err := u.questionsRepo.List()
+	if err != nil {
+		log.Println("QuestionsUsecase.ListQuestions:", err.Error())
+		return nil, err
+	}
+	return questions, nil
+}

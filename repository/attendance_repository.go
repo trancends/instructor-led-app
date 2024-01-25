@@ -51,7 +51,7 @@ func (a *attendanceRepository) GetAttendance(id string) (model.Attendance, error
 
 	// Execute the SQL query
 	row := a.db.QueryRow(`
-		SELECT id, user_id, schedule_id, created_at, updated_at, deleted_at
+		SELECT id, user_id, schedule_id
 		FROM attendances
 		WHERE id = $1
 	`, id)
@@ -61,9 +61,6 @@ func (a *attendanceRepository) GetAttendance(id string) (model.Attendance, error
 		&attendance.ID,
 		&attendance.UserID,
 		&attendance.ScheduleID,
-		&attendance.CreatedAt,
-		&attendance.UpdatedAt,
-		&attendance.DeletedAt,
 	)
 	if err != nil {
 		log.Println(err)
@@ -104,7 +101,7 @@ func (a *attendanceRepository) List() ([]model.Attendance, error) {
 
 	// Execute the SQL query
 	rows, err := a.db.Query(`
-		SELECT id, user_id, schedule_id, created_at, updated_at, deleted_at
+		SELECT id, user_id, schedule_id
 		FROM attendances
 	`)
 	if err != nil {
@@ -121,9 +118,6 @@ func (a *attendanceRepository) List() ([]model.Attendance, error) {
 			&attendance.ID,
 			&attendance.UserID,
 			&attendance.ScheduleID,
-			&attendance.CreatedAt,
-			&attendance.UpdatedAt,
-			&attendance.DeletedAt,
 		)
 		if err != nil {
 			log.Printf("Error scanning attendance row: %v", err)

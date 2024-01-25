@@ -24,7 +24,7 @@ func NewQuestionsController(questionsUC usecase.QuestionsUsecase, rg *gin.Router
 
 func (q *QuestionsController) Route() {
 	q.rg.GET("/question", q.GetQuestionsHandler)
-	q.rg.GET("/questions", q.ListQuestionsHandler)
+	q.rg.GET("/question/all", q.ListQuestionsHandler)
 }
 
 func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {

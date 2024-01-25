@@ -55,6 +55,7 @@ func (u *UserController) CreateUserHanlder(c *gin.Context) {
 }
 
 func (u *UserController) GetAllUserHandler(c *gin.Context) {
+	userRole := c.Query("role")
 	page, err := strconv.Atoi(c.Query("page"))
 	if err != nil {
 		common.SendErrorResponse(c, http.StatusBadRequest, "invalid page"+err.Error())
@@ -71,6 +72,20 @@ func (u *UserController) GetAllUserHandler(c *gin.Context) {
 	if size == 0 {
 		size = 10
 	}
+
+	if userRole != "" {
+		if userRole == "TRAINER" || userRole == "PARTICIPANT" {
+			log.Println("calling user usecase GetUserByRole")
+			users, paging, err := u.userUC.GetUserByRole(userRole, page, size)
+			if err != nil {
+				common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+				return
+			}
+			common.SendPagedResponse(c, users, paging, "success")
+			return
+		}
+	}
+
 	log.Println("calling user usecase ListAllUsers")
 	users, paging, err := u.userUC.ListAllUsers(page, size)
 	if err != nil {

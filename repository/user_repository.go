@@ -14,6 +14,10 @@ import (
 type UserRepository interface {
 	Create(payload model.User) error
 	List(page int, size int) ([]model.User, sharedmodel.Paging, error)
+	GetUserByEmail(email string) (model.User, error)
+	GetUserByRole(role string) ([]model.User, error)
+	Update(payload model.User) error
+	Delete(id string) error
 }
 
 type userRepository struct {
@@ -78,4 +82,49 @@ func (u *userRepository) List(page int, size int) ([]model.User, sharedmodel.Pag
 	}
 
 	return users, paging, nil
+}
+
+func (u *userRepository) GetUserByEmail(email string) (model.User, error) {
+	var user model.User
+	err := u.db.QueryRow(config.SelectUserByEmail, email).Scan(&user.ID, &user.Name, &user.Email, &user.Role)
+	if err != nil {
+		log.Println("userRepository Query SelectUserByEmail:", err.Error())
+		return model.User{}, err
+	}
+	return user, nil
+}
+
+func (u *userRepository) GetUserByRole(role string) ([]model.User, error) {
+	var users []model.User
+	err := u.db.QueryRow(config.SelectUserByRole, role).Scan(&users)
+	if err != nil {
+		log.Println("userRepository Query SelectUserByRole:", err.Error())
+		return nil, err
+	}
+	return users, nil
+}
+
+func (u *userRepository) Update(payload model.User) error {
+	var err error
+	user := payload
+	currTime := time.Now().Local()
+	user.UpdatedAt = currTime
+
+	_, err = u.db.Exec(config.UpdateUser, user.Name, user.Email, user.Password, user.Role, user.UpdatedAt, user.ID)
+	if err != nil {
+		log.Println("err at updating user", err)
+		return err
+	}
+
+	return nil
+}
+
+func (u *userRepository) Delete(id string) error {
+	deletetAt := time.Now().Local()
+	_, err := u.db.Exec(config.DeleteUser, deletetAt, id)
+	if err != nil {
+		log.Println("err at deleting user", err)
+		return err
+	}
+	return nil
 }

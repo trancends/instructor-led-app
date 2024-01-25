@@ -2,6 +2,8 @@
 package usecase
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 
 	"enigmaCamp.com/instructor_led/model"
@@ -21,7 +23,22 @@ type attendanceUsecase struct {
 
 // AddAttendance implements AttendanceUsecase.
 func (a *attendanceUsecase) AddAttendance(user_id string, schedule_id string) (model.Attendance, error) {
-	return a.attendanceRepo.Post(user_id, schedule_id)
+	existingAttendance, err := a.attendanceRepo.GetByID(user_id, schedule_id)
+
+	if user_id == "" || schedule_id == "" {
+		return model.Attendance{}, fmt.Errorf("user_id and schedule_id must be valid UUIDs")
+	}
+	if err == nil && existingAttendance.ID != "" {
+		fmt.Println(existingAttendance)
+		return model.Attendance{}, fmt.Errorf("attendance for user_id %s and schedule_id %s already exists", user_id, schedule_id)
+	}
+	if err != nil && err != sql.ErrNoRows {
+		log.Printf("Error checking for existing attendance: %v", err)
+		return model.Attendance{}, fmt.Errorf("failed to check for existing attendance: %v", err)
+	}
+
+	// If no duplicate is found, proceed to add the attendance
+	return a.attendanceRepo.Create(user_id, schedule_id)
 }
 
 // NewAttendanceUsecase initializes a new AttendanceUsecase.
@@ -33,7 +50,7 @@ func NewAttendanceUsecase(attendanceRepo repository.AttendanceRepository) Attend
 
 // GetAttendance returns a single attendance based on the given ID.
 func (u *attendanceUsecase) GetAttendance(id string) (model.Attendance, error) {
-	attendance, err := u.attendanceRepo.Get(id)
+	attendance, err := u.attendanceRepo.GetAttendance(id)
 	if err != nil {
 		log.Println("AttendanceUsecase.GetAttendance:", err.Error())
 		return model.Attendance{}, err

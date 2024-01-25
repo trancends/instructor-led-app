@@ -9,17 +9,44 @@ import (
 )
 
 type AttendanceRepository interface {
-	Get(id string) (model.Attendance, error)
+	GetAttendance(id string) (model.Attendance, error)
 	List() ([]model.Attendance, error)
-	Post(user_id string, schedule_id string) (model.Attendance, error)
+	Create(user_id string, schedule_id string) (model.Attendance, error)
+	GetByID(user_id string, schedule_id string) (model.Attendance, error)
 }
 
 type attendanceRepository struct {
 	db *sql.DB
 }
 
-// Get implements AttendanceRepository.
-func (a *attendanceRepository) Get(id string) (model.Attendance, error) {
+// GetByID implements AttendanceRepository.
+func (a *attendanceRepository) GetByID(user_id string, schedule_id string) (model.Attendance, error) {
+	var attendance model.Attendance
+	row := a.db.QueryRow(`
+		SELECT id, user_id, schedule_id, created_at, updated_at, deleted_at
+		FROM attendances
+		WHERE user_id = $1 AND schedule_id = $2
+	`, user_id, schedule_id)
+
+	// Scan the result into the attendance struct
+	err := row.Scan(
+		&attendance.ID,
+		&attendance.UserID,
+		&attendance.ScheduleID,
+		&attendance.CreatedAt,
+		&attendance.UpdatedAt,
+		&attendance.DeletedAt,
+	)
+	if err != nil {
+		log.Println(err)
+		return model.Attendance{}, err
+	}
+
+	return attendance, nil
+}
+
+// GetAttendance implements AttendanceRepository.
+func (a *attendanceRepository) GetAttendance(id string) (model.Attendance, error) {
 	var attendance model.Attendance
 
 	// Execute the SQL query
@@ -45,23 +72,20 @@ func (a *attendanceRepository) Get(id string) (model.Attendance, error) {
 
 	return attendance, nil
 }
-func (a *attendanceRepository) Post(user_id string, schedule_id string) (model.Attendance, error) {
+
+func (a *attendanceRepository) Create(user_id string, schedule_id string) (model.Attendance, error) {
 	var attendance model.Attendance
 
 	// Validate UUIDs
-	if user_id == "" || schedule_id == "" {
-		return model.Attendance{}, fmt.Errorf("user_id and schedule_id must be valid UUIDs")
-	}
-
+	
+	attendance.UserID = user_id
+	attendance.ScheduleID = schedule_id
 	err := a.db.QueryRow(`
 		INSERT INTO attendances (user_id, schedule_id)
 		VALUES ($1, $2)
-		RETURNING id, created_at, updated_at, deleted_at
+		RETURNING id
 	`, user_id, schedule_id).Scan(
 		&attendance.ID,
-		&attendance.CreatedAt,
-		&attendance.UpdatedAt,
-		&attendance.DeletedAt,
 	)
 
 	if err != nil {
@@ -75,6 +99,7 @@ func (a *attendanceRepository) Post(user_id string, schedule_id string) (model.A
 
 	return attendance, nil
 }
+
 func (a *attendanceRepository) List() ([]model.Attendance, error) {
 	var attendances []model.Attendance
 
@@ -116,6 +141,7 @@ func (a *attendanceRepository) List() ([]model.Attendance, error) {
 
 	return attendances, nil
 }
+
 func NewAttendanceRepository(db *sql.DB) AttendanceRepository {
 	return &attendanceRepository{db: db}
 }

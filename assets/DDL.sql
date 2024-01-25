@@ -49,6 +49,5 @@ CREATE TABLE attendances (
 
 ALTER TABLE schedules ADD CONSTRAINT "schedules_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE questions ADD CONSTRAINT "questions_schedule_id_fkey" FOREIGN KEY (schedule_id) REFERENCES schedules(id);
-ALTER TABLE questions ADD CONSTAINT "questions_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE attendances ADD CONSTRAINT "attendances_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE attendances ADD CONSTRAINT "attendances_schedule_id_fkey" FOREIGN KEY (schedule_id) REFERENCES schedules(id);

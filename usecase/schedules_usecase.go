@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
 	"log"
 
 	"enigmaCamp.com/instructor_led/model"
@@ -41,18 +44,24 @@ func (s *schedulesUseCase) FindAllScheduleUC(page int, size int) ([]model.Schedu
 
 // FindByIDUC implements ShecdulesUseCase.
 func (s *schedulesUseCase) FindByIDUC(id string) (model.Schedule, error) {
-	schdule, err := s.scheduleRepository.GetByID(id)
+	schedule, err := s.scheduleRepository.GetByID(id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return schedule, errors.New("schedule not found")
+		}
 		log.Println("schedulesUseCase.FindByIDUC:", err.Error())
-		return schdule, err
+		return schedule, err
 	}
-	return schdule, nil
+	return schedule, nil
 }
 
 // DeletedScheduleIDUC implements ShecdulesUseCase.
 func (s *schedulesUseCase) DeletedScheduleIDUC(id string) error {
 	err := s.scheduleRepository.Delete(id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("schedule with ID %s not found", id)
+		}
 		log.Println("schedulesUseCase.DeletedScheduleIDUC:", err.Error())
 		return err
 	}

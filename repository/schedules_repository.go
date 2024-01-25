@@ -25,19 +25,29 @@ type scheduleRepository struct {
 // CreateScheduled implements ScheduleRepository.
 func (s *scheduleRepository) CreateScheduled(payload model.Schedule) (model.Schedule, error) {
 	var schedule model.Schedule
-	rows, err := s.db.Query(config.InsertSchedule)
+
+	// Assuming s.db is a *sql.DB connection
+	err := s.db.QueryRow(
+		config.InsertSchedule,
+		payload.UserID,
+		payload.Date,
+		payload.StartTime,
+		payload.EndTime,
+		payload.Documentation,
+	).Scan(
+		&schedule.ID,
+		&schedule.UserID,
+		&schedule.Date,
+		&schedule.StartTime,
+		&schedule.EndTime,
+		&schedule.Documentation,
+	)
+
 	if err != nil {
-		log.Println("scheduleRepository.Query:", err.Error())
+		log.Println("scheduleRepository.CreateScheduled:", err.Error())
 		return schedule, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		err := rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation)
-		if err != nil {
-			log.Println("scheduleRepository.Scan:", err.Error())
-		}
-	}
 	return schedule, nil
 }
 
@@ -56,7 +66,7 @@ func (s *scheduleRepository) ListScheduled(page int, size int) ([]model.Schedule
 
 	for rows.Next() {
 		var schedule model.Schedule
-		err := rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation, &schedule.CreatedAt, &schedule.UpdatedAt)
+		err := rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation)
 		if err != nil {
 			log.Println("scheduleRepository.Scan:", err.Error())
 			return nil, sharedmodel.Paging{}, err
@@ -81,6 +91,7 @@ func (s *scheduleRepository) ListScheduled(page int, size int) ([]model.Schedule
 // GetByID implements ScheduleRepository.
 func (s *scheduleRepository) GetByID(id string) (model.Schedule, error) {
 	var schedule model.Schedule
+	schedule.ID = id
 	rows, err := s.db.Query(config.SelectScheduleByID, id)
 	if err != nil {
 		log.Println("scheduleRepository.Query:", err.Error())
@@ -88,22 +99,34 @@ func (s *scheduleRepository) GetByID(id string) (model.Schedule, error) {
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		err := rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation)
-		if err != nil {
-			log.Println("scheduleRepository.Scan:", err.Error())
-			return schedule, err
-		}
+	if !rows.Next() {
+		return schedule, sql.ErrNoRows
+	}
+
+	err = rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation)
+	if err != nil {
+		log.Println("scheduleRepository.Scan:", err.Error())
+		return schedule, err
 	}
 	return schedule, nil
 }
 
 func (s *scheduleRepository) Delete(id string) error {
 	deletedAt := time.Now().Local()
-	_, err := s.db.Exec(config.DeleteSchedule, deletedAt, id)
+	result, err := s.db.Exec(config.DeleteSchedule, deletedAt, id)
 	if err != nil {
 		log.Println("scheduleRepository.Delete:", err.Error())
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("scheduleRepository.Delete:", err.Error())
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
 	}
 	return nil
 }

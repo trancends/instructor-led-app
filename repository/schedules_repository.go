@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"math"
+	"time"
 
 	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/model"
@@ -14,6 +15,7 @@ type ScheduleRepository interface {
 	ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error)
 	CreateScheduled(payload model.Schedule) (model.Schedule, error)
 	GetByID(id string) (model.Schedule, error)
+	Delete(id string) error
 }
 
 type scheduleRepository struct {
@@ -94,6 +96,16 @@ func (s *scheduleRepository) GetByID(id string) (model.Schedule, error) {
 		}
 	}
 	return schedule, nil
+}
+
+func (s *scheduleRepository) Delete(id string) error {
+	deletedAt := time.Now().Local()
+	_, err := s.db.Exec(config.DeleteSchedule, deletedAt, id)
+	if err != nil {
+		log.Println("scheduleRepository.Delete:", err.Error())
+		return err
+	}
+	return nil
 }
 
 func NewSchedulesRepository(db *sql.DB) ScheduleRepository {

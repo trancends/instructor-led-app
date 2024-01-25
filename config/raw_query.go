@@ -10,4 +10,5 @@ const (
 	InsertQuestions    = `INSERT INTO questions (id,schedule_id,description) VALUES ($1,$2,$3,'PROCESSED') RETURNING id`
 	InsertSchedule     = `INSERT INTO schedules (id,user_id,date,start_time,end_time,documentation) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`
 	SelectScheduleByID = `SELECT id, user_id, documentation, date, start_time, end_time FROM schedules WHERE id = $1`
+	DeleteSchedule     = `UPDATE schedules SET deleted_at = $1 WHERE id = $2`
 )

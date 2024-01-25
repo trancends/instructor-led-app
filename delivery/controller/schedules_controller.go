@@ -65,3 +65,13 @@ func (s *SchedulesController) FindByIDScheduleHandler(c *gin.Context) {
 	}
 	common.SendSingleResponse(c, payloads, "success")
 }
+
+func (s *SchedulesController) DeleteScheduleHandler(c *gin.Context) {
+	id := c.Param("id")
+	err := s.schedulesUC.DeletedScheduleIDUC(id)
+	if err != nil {
+		log.Println("SchedulesController.DeleteScheduleHandler:", err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+	}
+	common.SendSingleResponse(c, nil, "success")
+}

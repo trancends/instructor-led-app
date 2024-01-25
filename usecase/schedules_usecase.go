@@ -12,6 +12,7 @@ type ShecdulesUseCase interface {
 	FindAllScheduleUC(page int, size int) ([]model.Schedule, sharedmodel.Paging, error)
 	CreateScheduledUC(payload model.Schedule) (model.Schedule, error)
 	FindByIDUC(id string) (model.Schedule, error)
+	DeletedScheduleIDUC(id string) error
 }
 
 type schedulesUseCase struct {
@@ -48,7 +49,15 @@ func (s *schedulesUseCase) FindByIDUC(id string) (model.Schedule, error) {
 	return schdule, nil
 }
 
-// FindAllSchedule implements ParticipantUseCase.
+// DeletedScheduleIDUC implements ShecdulesUseCase.
+func (s *schedulesUseCase) DeletedScheduleIDUC(id string) error {
+	err := s.scheduleRepository.Delete(id)
+	if err != nil {
+		log.Println("schedulesUseCase.DeletedScheduleIDUC:", err.Error())
+		return err
+	}
+	return nil
+}
 
 func NewSchedulesUseCase(scheduleRepository repository.ScheduleRepository) ShecdulesUseCase {
 	return &schedulesUseCase{scheduleRepository}

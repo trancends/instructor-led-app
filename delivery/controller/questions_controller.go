@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"enigmaCamp.com/instructor_led/shared/common"
 	"enigmaCamp.com/instructor_led/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -36,31 +37,28 @@ func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {
 	if err != nil {
 		log.Printf("Invalid date format: %v\n", err)
 		if date == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Date is required"})
-			return
+			common.SendErrorResponse(c, http.StatusBadRequest, "Date is required")
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Expected format: 2006-01-02"})
-		return
+		common.SendErrorResponse(c, http.StatusBadRequest, "Invalid date format")
 	}
 
 	schedules, err := q.questionsUC.GetQuestion(date)
 	log.Println(schedules)
 	if err != nil {
 		log.Printf("Error retrieving schedules for date %s: %v\n", date, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve questions"})
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	// Return the list of schedules as JSON
-	c.JSON(http.StatusOK, gin.H{"schedules": schedules})
+	common.SendSingleResponse(c, schedules, "success")
 }
 
 func (q *QuestionsController) ListQuestionsHandler(c *gin.Context) {
 	questions, err := q.questionsUC.ListQuestions()
 	log.Println(questions)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve questions"})
-		return
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
-	c.JSON(http.StatusOK, gin.H{"questions": questions})
+	common.SendSingleResponse(c, questions, "success")
 }

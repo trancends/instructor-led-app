@@ -22,7 +22,7 @@ func NewSchedulesController(schedulesUC usecase.ShecdulesUseCase, rg *gin.Router
 }
 
 func (s *SchedulesController) Route() {
-	s.rg.GET("/schedule", s.FindAllScheduleHandler)
+	s.rg.GET("/schedules", s.FindAllScheduleHandler)
 }
 
 func (s *SchedulesController) FindAllScheduleHandler(c *gin.Context) {

@@ -28,6 +28,7 @@ CREATE TABLE schedules (
 
 CREATE TABLE questions (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id uuid NOT NULL,
     schedule_id uuid NOT NULL,
     description TEXT NOT NULL,
     status status_type DEFAULT 'PROCESS',
@@ -48,5 +49,6 @@ CREATE TABLE attendances (
 
 ALTER TABLE schedules ADD CONSTRAINT "schedules_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE questions ADD CONSTRAINT "questions_schedule_id_fkey" FOREIGN KEY (schedule_id) REFERENCES schedules(id);
+ALTER TABLE questions ADD CONSTRAINT "questions_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE attendances ADD CONSTRAINT "attendances_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE attendances ADD CONSTRAINT "attendances_schedule_id_fkey" FOREIGN KEY (schedule_id) REFERENCES schedules(id);

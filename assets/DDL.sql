@@ -28,6 +28,7 @@ CREATE TABLE schedules (
 
 CREATE TABLE questions (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id uuid NOT NULL,
     schedule_id uuid NOT NULL,
     description TEXT NOT NULL,
     status status_type DEFAULT 'PROCESS',

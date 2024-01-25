@@ -30,6 +30,8 @@ func (u *UserController) Route() {
 	u.rg.POST("/users", u.CreateUserHanlder)
 	u.rg.GET("/users", u.GetAllUserHandler)
 	u.rg.GET("/users/:email", u.GetUserByEmailHandler)
+	u.rg.PUT("/users/:id", u.UpdateUserHandler)
+	u.rg.DELETE("/users/:id", u.DeleteUserHandler)
 }
 
 func (u *UserController) CreateUserHanlder(c *gin.Context) {

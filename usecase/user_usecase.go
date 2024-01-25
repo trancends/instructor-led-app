@@ -57,7 +57,7 @@ func (u *userUsecase) GetUserByEmail(email string) (model.User, error) {
 
 func (u *userUsecase) GetUserByID(id string) (model.User, error) {
 	log.Println("calling user repo Get")
-	user, err := u.userRepository.GetUserBy(id)
+	user, err := u.userRepository.GetUserByID(id)
 	if err != nil {
 		return model.User{}, err
 	}

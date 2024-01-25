@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
@@ -26,6 +28,8 @@ func NewUserController(userUC usecase.UserUsecase, rg *gin.RouterGroup) *UserCon
 
 func (u *UserController) Route() {
 	u.rg.POST("/users", u.CreateUserHanlder)
+	u.rg.GET("/users", u.GetAllUserHandler)
+	u.rg.GET("/users/:email", u.GetUserByEmailHandler)
 }
 
 func (u *UserController) CreateUserHanlder(c *gin.Context) {
@@ -48,6 +52,7 @@ func (u *UserController) CreateUserHanlder(c *gin.Context) {
 	log.Println("calling user usecase CreateUser")
 	err := u.userUC.CreateUser(user)
 	if err != nil {
+		log.Println("error at calling user usecase CreateUser", err)
 		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to create user"+err.Error())
 		return
 	}
@@ -78,6 +83,7 @@ func (u *UserController) GetAllUserHandler(c *gin.Context) {
 			log.Println("calling user usecase GetUserByRole")
 			users, paging, err := u.userUC.GetUserByRole(userRole, page, size)
 			if err != nil {
+				log.Println("error at calling userUC getUserByRole", err)
 				common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 				return
 			}
@@ -89,6 +95,7 @@ func (u *UserController) GetAllUserHandler(c *gin.Context) {
 	log.Println("calling user usecase ListAllUsers")
 	users, paging, err := u.userUC.ListAllUsers(page, size)
 	if err != nil {
+		log.Println("error at calling userUC ListAllUsers", err)
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -105,9 +112,43 @@ func (u *UserController) GetUserByEmailHandler(c *gin.Context) {
 	log.Println("calling user usecase GetUserByEmail")
 	user, err := u.userUC.GetUserByEmail(userEmail)
 	if err != nil {
+		log.Println("error at user usecase GetUserByEmail", err)
 		common.SendErrorResponse(c, http.StatusBadRequest, "user not found"+err.Error())
 		return
 	}
 
 	common.SendSingleResponse(c, user, "success")
+}
+
+func (u *UserController) UpdateUserHandler(c *gin.Context) {
+	userId := c.Param("id")
+	_, err := u.userUC.GetUserByID(userId)
+	if err == sql.ErrNoRows {
+		log.Println("error at calling user usecase GetUserByID", err)
+		common.SendErrorResponse(c, http.StatusBadRequest, "user not found"+err.Error())
+		return
+	}
+}
+
+func (u *UserController) DeleteUserHandler(c *gin.Context) {
+	userId := c.Param("id")
+	_, err := u.userUC.GetUserByID(userId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.SendErrorResponse(c, http.StatusBadRequest, "user not found"+err.Error())
+			return
+		}
+		log.Println("error at calling user usecase GetUserByID", err)
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to get user"+err.Error())
+		return
+	}
+
+	err = u.userUC.DeleteUser(userId)
+	if err != nil {
+		fmt.Println("error at calling user usecase DeleteUser", err)
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to delete user"+err.Error())
+		return
+	}
+
+	common.SendSingleResponse(c, userId, "user deleted successfully")
 }

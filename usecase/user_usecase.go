@@ -12,6 +12,7 @@ type UserUsecase interface {
 	CreateUser(payload model.User) error
 	ListAllUsers(page int, size int) ([]model.User, sharedmodel.Paging, error)
 	GetUserByEmail(email string) (model.User, error)
+	GetUserByID(id string) (model.User, error)
 	GetUserByRole(role string, page int, size int) ([]model.User, sharedmodel.Paging, error)
 	UpdateUser(payload model.User) error
 	DeleteUser(id string) error
@@ -48,6 +49,15 @@ func (u *userUsecase) ListAllUsers(page int, size int) ([]model.User, sharedmode
 func (u *userUsecase) GetUserByEmail(email string) (model.User, error) {
 	log.Println("calling user repo Get")
 	user, err := u.userRepository.GetUserByEmail(email)
+	if err != nil {
+		return model.User{}, err
+	}
+	return user, nil
+}
+
+func (u *userUsecase) GetUserByID(id string) (model.User, error) {
+	log.Println("calling user repo Get")
+	user, err := u.userRepository.GetUserBy(id)
 	if err != nil {
 		return model.User{}, err
 	}

@@ -15,6 +15,7 @@ type UserRepository interface {
 	Create(payload model.User) error
 	List(page int, size int) ([]model.User, sharedmodel.Paging, error)
 	GetUserByEmail(email string) (model.User, error)
+	GetUserBy(id string) (model.User, error)
 	GetUserByRole(role string, page int, size int) ([]model.User, sharedmodel.Paging, error)
 	Update(payload model.User) error
 	Delete(id string) error
@@ -130,6 +131,16 @@ func (u *userRepository) GetUserByRole(role string, page int, size int) ([]model
 	}
 
 	return users, paging, nil
+}
+
+func (u *userRepository) GetUserBy(id string) (model.User, error) {
+	var user model.User
+	err := u.db.QueryRow(config.SelectUserByID, id).Scan(&user.ID, &user.Name, &user.Email, &user.Role)
+	if err != nil {
+		log.Println("userRepository Query SelectUserByID:", err.Error())
+		return model.User{}, err
+	}
+	return user, nil
 }
 
 func (u *userRepository) Update(payload model.User) error {

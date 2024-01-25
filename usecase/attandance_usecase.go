@@ -21,7 +21,7 @@ type attendanceUsecase struct {
 
 // AddAttendance implements AttendanceUsecase.
 func (a *attendanceUsecase) AddAttendance(user_id string, schedule_id string) (model.Attendance, error) {
-	panic("unimplemented")
+	return a.attendanceRepo.Post(user_id, schedule_id)
 }
 
 // NewAttendanceUsecase initializes a new AttendanceUsecase.

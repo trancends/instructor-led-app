@@ -45,12 +45,14 @@ func (a *attendanceRepository) Get(id string) (model.Attendance, error) {
 
 	return attendance, nil
 }
-
-// Post implements AttendanceRepository.
 func (a *attendanceRepository) Post(user_id string, schedule_id string) (model.Attendance, error) {
 	var attendance model.Attendance
 
-	// Execute the SQL query to insert a new attendance record
+	// Validate UUIDs
+	if user_id == "" || schedule_id == "" {
+		return model.Attendance{}, fmt.Errorf("user_id and schedule_id must be valid UUIDs")
+	}
+
 	err := a.db.QueryRow(`
 		INSERT INTO attendances (user_id, schedule_id)
 		VALUES ($1, $2)
@@ -73,8 +75,6 @@ func (a *attendanceRepository) Post(user_id string, schedule_id string) (model.A
 
 	return attendance, nil
 }
-
-// List implements AttendanceRepository.
 func (a *attendanceRepository) List() ([]model.Attendance, error) {
 	var attendances []model.Attendance
 
@@ -109,7 +109,6 @@ func (a *attendanceRepository) List() ([]model.Attendance, error) {
 		attendances = append(attendances, attendance)
 	}
 
-	// Check for errors from iterating over rows.
 	if err := rows.Err(); err != nil {
 		log.Printf("Error iterating over attendance rows: %v", err)
 		return nil, fmt.Errorf("failed to iterate over attendance rows: %v", err)

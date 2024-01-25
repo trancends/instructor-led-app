@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +23,7 @@ func NewAttandanceController(rg *gin.RouterGroup, attendanceUC usecase.Attendanc
 func (a *AttandanceController) Route() {
 	a.rg.GET("/attendance", a.GetAllAttendanceHandler)
 	a.rg.GET("/attendance/:id", a.GetAttendanceByID)
+	a.rg.POST("/attendance", a.AddAttendanceHandler)
 }
 
 func (a *AttandanceController) GetAllAttendanceHandler(c *gin.Context) {
@@ -44,4 +46,17 @@ func (a *AttandanceController) GetAttendanceByID(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"attendance": attendance})
+}
+func (a *AttandanceController) AddAttendanceHandler(c *gin.Context) {
+	var attendance model.Attendance
+	if err := c.ShouldBindJSON(&attendance); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	createdAttendance, err := a.attendanceUC.AddAttendance(attendance.UserID, attendance.ScheduleID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add attendance"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"attendance": createdAttendance})
 }

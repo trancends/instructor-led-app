@@ -4,6 +4,7 @@ package controller
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"enigmaCamp.com/instructor_led/usecase"
 	"github.com/gin-gonic/gin"
@@ -28,13 +29,24 @@ func (q *QuestionsController) Route() {
 }
 
 func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {
-
 	date := c.Query("date")
 
-	// Call the use case to retrieve a list of schedules based on the given date
+	// Validasi format tanggal
+	_, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		log.Printf("Invalid date format: %v\n", err)
+		if date == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Date is required"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Expected format: 2006-01-02"})
+		return
+	}
+
 	schedules, err := q.questionsUC.GetQuestion(date)
 	log.Println(schedules)
 	if err != nil {
+		log.Printf("Error retrieving schedules for date %s: %v\n", date, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve questions"})
 		return
 	}

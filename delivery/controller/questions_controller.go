@@ -26,13 +26,16 @@ func (q *QuestionsController) Route() {
 }
 
 func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {
-	// Call the use case to retrieve a list of questions
-	questions, err := q.questionsUC.ListQuestions()
+	// Modify the code to handle the new use case method
+	date := c.Query("date")
+
+	// Call the use case to retrieve a list of schedules based on the given date
+	schedules, err := q.questionsUC.GetQuestion(date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve questions"})
 		return
 	}
 
-	// Return the list of questions as JSON
-	c.JSON(http.StatusOK, gin.H{"questions": questions})
+	// Return the list of schedules as JSON
+	c.JSON(http.StatusOK, gin.H{"schedules": schedules})
 }

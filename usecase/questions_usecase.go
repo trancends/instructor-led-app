@@ -9,8 +9,8 @@ import (
 )
 
 type QuestionsUsecase interface {
-	GetQuestion(id string) (model.Question, error)
-	ListQuestions() ([]model.Question, error)
+	GetQuestion(date string) ([]*model.Schedule, error)
+	//ListQuestions() ([]model.Question, error)
 }
 
 type questionsUsecase struct {
@@ -24,22 +24,22 @@ func NewQuestionsUsecase(questionsRepo repository.QuestionsRepository) Questions
 	}
 }
 
-// GetQuestion returns a single question based on the given ID.
-func (u *questionsUsecase) GetQuestion(id string) (model.Question, error) {
-	question, err := u.questionsRepo.Get(id)
+// GetQuestion returns a list of schedules based on the given date.
+func (u *questionsUsecase) GetQuestion(date string) ([]*model.Schedule, error) {
+	schedules, err := u.questionsRepo.Get(date)
 	if err != nil {
 		log.Println("QuestionsUsecase.GetQuestion:", err.Error())
-		return model.Question{}, err
+		return nil, err
 	}
-	return question, nil
+	return schedules, nil
 }
 
 // ListQuestions returns a list of questions.
-func (u *questionsUsecase) ListQuestions() ([]model.Question, error) {
-	questions, err := u.questionsRepo.List()
-	if err != nil {
-		log.Println("QuestionsUsecase.ListQuestions:", err.Error())
-		return nil, err
-	}
-	return questions, nil
-}
+// func (u *questionsUsecase) ListQuestions() ([]model.Question, error) {
+// 	questions, err := u.questionsRepo.List()
+// 	if err != nil {
+// 		log.Println("QuestionsUsecase.ListQuestions:", err.Error())
+// 		return nil, err
+// 	}
+// 	return questions, nil
+// }

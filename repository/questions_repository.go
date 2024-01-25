@@ -9,8 +9,8 @@ import (
 )
 
 type QuestionsRepository interface {
-	Get(id string) (model.Question, error)
-	List() ([]model.Question, error)
+	Get(date string) ([]*model.Schedule, error)
+	//List() ([]model.Question, error)
 }
 
 type questionsRepository struct {
@@ -18,12 +18,11 @@ type questionsRepository struct {
 }
 
 // Get implements QuestionsRepository.
-func (q *questionsRepository) Get(id string) (model.Question, error) {
-	var question model.Question
-
-	row := q.db.QueryRow(`
+func (q *questionsRepository) Get(date string) ([]*model.Schedule, error) {
+	rows, err := q.db.Query(`
 		SELECT
 			schedules.id AS schedule_id,
+			schedules.user_id,
 			schedules.date,
 			schedules.start_time,
 			schedules.end_time,
@@ -35,75 +34,60 @@ func (q *questionsRepository) Get(id string) (model.Question, error) {
 		JOIN
 			questions ON schedules.id = questions.schedule_id
 		WHERE
-			questions.id = $1;
-	`, id)
-
-	err := row.Scan(
-		&question.ScheduleID,
-		&question.Date,
-		&question.ID,
-		&question.Description,
-		&question.Status,
-	)
-
+			schedules.date = $1 ;
+	`, date)
 	if err != nil {
 		log.Println("questionsRepository.Get:", err.Error())
-		return model.Question{}, err
-	}
-
-	return question, nil
-}
-
-// List implements QuestionsRepository.
-func (q *questionsRepository) List() ([]model.Question, error) {
-	var questions []model.Question
-
-	rows, err := q.db.Query(`
-		SELECT
-			schedules.id AS schedule_id,
-			schedules.date,
-			schedules.start_time,
-			schedules.end_time,
-			questions.id AS question_id,
-			questions.description,
-			questions.status
-		FROM
-			schedules
-		JOIN
-			questions ON schedules.id = questions.schedule_id;
-	`)
-	if err != nil {
-		log.Println("questionsRepository.List:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
+	ScheduleSlice := make([]*model.Schedule, 0)
+
 	for rows.Next() {
 		var question model.Question
+		var schedule model.Schedule
 
 		err := rows.Scan(
-			&question.ScheduleID,
-			&question.Date,
+			&schedule.ID,
+			&schedule.UserID,
+			&schedule.Date,
+			&schedule.StartTime,
+			&schedule.EndTime,
 			&question.ID,
 			&question.Description,
 			&question.Status,
-			&question,
 		)
+
 		if err != nil {
-			log.Println("questionsRepository.List:", err.Error())
+			log.Println("questionsRepository.Get:", err.Error())
 			return nil, err
 		}
 
-		questions = append(questions, question)
+		// Check if schedule already exists in ScheduleSlice
+		var found bool
+		for _, existingSchedule := range ScheduleSlice {
+			if existingSchedule.ID == schedule.ID {
+				found = true
+				existingSchedule.Questions = append(existingSchedule.Questions, question)
+				break
+			}
+		}
+
+		// If schedule doesn't exist, add it to ScheduleSlice
+		if !found {
+			schedule.Questions = append(schedule.Questions, question)
+			ScheduleSlice = append(ScheduleSlice, &schedule)
+		}
 	}
 
-	if err := rows.Err(); err != nil {
-		log.Println("questionsRepository.List:", err.Error())
-		return nil, err
-	}
-
-	return questions, nil
+	return ScheduleSlice, nil
 }
+
+// List implements QuestionsRepository.
+// func (q *questionsRepository) List() ([]model.Question, error) {
+// 	// Implementasi List tetap sama seperti sebelumnya
+// }
 
 func NewQuestionsRepository(db *sql.DB) QuestionsRepository {
 	return &questionsRepository{

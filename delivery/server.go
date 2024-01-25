@@ -15,17 +15,21 @@ import (
 )
 
 type Server struct {
-	scheduleUC usecase.ShecdulesUseCase
+	scheduleUC   usecase.ShecdulesUseCase
 	userUC usecase.UserUsecase
-	engine     *gin.Engine
-	host       string
+	questionsUC  usecase.QuestionsUsecase
+	attendanceUC usecase.AttendanceUsecase
+	engine       *gin.Engine
+	host         string
 }
 
 func (s *Server) initRoute() {
 	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
-	controller.NewUserController(s.userUC, rg).Route()
+    controller.NewUserController(s.userUC, rg).Route()
 	controller.NewSchedulesController(s.scheduleUC, rg).Route()
+	controller.NewQuestionsController(s.questionsUC, rg).Route()
+	controller.NewAttandanceController(rg, s.attendanceUC).Route()
 }
 
 func (s *Server) Run() {
@@ -59,18 +63,24 @@ func NewServer() *Server {
 		log.Fatal(fmt.Errorf("config error: %v", err))
 	}
 
-	schedulesRepository := repository.NewSchedulesRepository(db)
-	schedulesUseCase := usecase.NewSchedulesUseCase(schedulesRepository)
 	userRepository := repository.NewUserRepository(db)
 	userUseCase := usecase.NewUserUsecase(userRepository)
+	schedulesRepository := repository.NewSchedulesRepository(db)
+	schedulesUseCase := usecase.NewSchedulesUseCase(schedulesRepository)
+	questionRepository := repository.NewQuestionsRepository(db)
+	questionsUseCase := usecase.NewQuestionsUsecase(questionRepository)
+	attendanceRepository := repository.NewAttendanceRepository(db)
+	attendanceUseCase := usecase.NewAttendanceUsecase(attendanceRepository)
 
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
 	return &Server{
-		scheduleUC: schedulesUseCase,
+		scheduleUC:   schedulesUseCase,
 		userUC: userUseCase,
-		engine:     engine,
-		host:       host,
+		questionsUC:  questionsUseCase,
+		attendanceUC: attendanceUseCase,
+		engine:       engine,
+		host:         host,
 	}
 }

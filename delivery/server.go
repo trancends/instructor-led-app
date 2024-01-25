@@ -15,15 +15,17 @@ import (
 )
 
 type Server struct {
-	scheduleUC usecase.ShecdulesUseCase
-	userUC usecase.UserUsecase
-	engine     *gin.Engine
-	host       string
+	scheduleUC  usecase.ShecdulesUseCase
+	userUC      usecase.UserUsecase
+	questionsUC usecase.QuestionsUsecase
+	engine      *gin.Engine
+	host        string
 }
 
 func (s *Server) initRoute() {
 	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
+	controller.NewQuestionsController(s.questionsUC, rg).Route()
 	controller.NewUserController(s.userUC, rg).Route()
 	controller.NewSchedulesController(s.scheduleUC, rg).Route()
 }
@@ -69,7 +71,7 @@ func NewServer() *Server {
 
 	return &Server{
 		scheduleUC: schedulesUseCase,
-		userUC: userUseCase,
+		userUC:     userUseCase,
 		engine:     engine,
 		host:       host,
 	}

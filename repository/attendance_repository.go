@@ -45,6 +45,7 @@ func (a *attendanceRepository) Get(id string) (model.Attendance, error) {
 
 	return attendance, nil
 }
+
 func (a *attendanceRepository) Post(user_id string, schedule_id string) (model.Attendance, error) {
 	var attendance model.Attendance
 
@@ -63,7 +64,6 @@ func (a *attendanceRepository) Post(user_id string, schedule_id string) (model.A
 		&attendance.UpdatedAt,
 		&attendance.DeletedAt,
 	)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return model.Attendance{}, fmt.Errorf("no rows returned, record may not be inserted")
@@ -75,6 +75,7 @@ func (a *attendanceRepository) Post(user_id string, schedule_id string) (model.A
 
 	return attendance, nil
 }
+
 func (a *attendanceRepository) List() ([]model.Attendance, error) {
 	var attendances []model.Attendance
 
@@ -116,6 +117,7 @@ func (a *attendanceRepository) List() ([]model.Attendance, error) {
 
 	return attendances, nil
 }
+
 func NewAttendanceRepository(db *sql.DB) AttendanceRepository {
 	return &attendanceRepository{db: db}
 }

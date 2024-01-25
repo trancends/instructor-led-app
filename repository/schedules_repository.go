@@ -12,19 +12,40 @@ import (
 
 type ScheduleRepository interface {
 	ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error)
+	CreateScheduled(payload model.Schedule) (model.Schedule, error)
+	GetByID(id string) (model.Schedule, error)
 }
 
 type scheduleRepository struct {
 	db *sql.DB
 }
 
+// CreateScheduled implements ScheduleRepository.
+func (s *scheduleRepository) CreateScheduled(payload model.Schedule) (model.Schedule, error) {
+	var schedule model.Schedule
+	rows, err := s.db.Query(config.InsertSchedule)
+	if err != nil {
+		log.Println("scheduleRepository.Query:", err.Error())
+		return schedule, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation)
+		if err != nil {
+			log.Println("scheduleRepository.Scan:", err.Error())
+		}
+	}
+	return schedule, nil
+}
+
 // List implements ParticipantRepository.
-func (p *scheduleRepository) ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error) {
+func (s *scheduleRepository) ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error) {
 	var schedules []model.Schedule
 	offset := (page - 1) * size
 	query := config.SelectSchedulePagination
 
-	rows, err := p.db.Query(query, size, offset)
+	rows, err := s.db.Query(query, size, offset)
 	if err != nil {
 		log.Println("scheduleRepository.Query:", err.Error())
 		return nil, sharedmodel.Paging{}, err
@@ -42,7 +63,7 @@ func (p *scheduleRepository) ListScheduled(page int, size int) ([]model.Schedule
 	}
 
 	totalRows := 0
-	if err := p.db.QueryRow("SELECT COUNT(*) FROM schedules").Scan(&totalRows); err != nil {
+	if err := s.db.QueryRow("SELECT COUNT(*) FROM schedules").Scan(&totalRows); err != nil {
 		return nil, sharedmodel.Paging{}, err
 	}
 
@@ -53,6 +74,26 @@ func (p *scheduleRepository) ListScheduled(page int, size int) ([]model.Schedule
 		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
 	}
 	return schedules, paging, nil
+}
+
+// GetByID implements ScheduleRepository.
+func (s *scheduleRepository) GetByID(id string) (model.Schedule, error) {
+	var schedule model.Schedule
+	rows, err := s.db.Query(config.SelectScheduleByID, id)
+	if err != nil {
+		log.Println("scheduleRepository.Query:", err.Error())
+		return schedule, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation)
+		if err != nil {
+			log.Println("scheduleRepository.Scan:", err.Error())
+			return schedule, err
+		}
+	}
+	return schedule, nil
 }
 
 func NewSchedulesRepository(db *sql.DB) ScheduleRepository {

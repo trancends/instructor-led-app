@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"enigmaCamp.com/instructor_led/model"
@@ -28,6 +29,7 @@ func (q *QuestionsController) Route() {
 func (q *QuestionsController) CreateQuestionsHandler(c *gin.Context) {
 	var payload model.Questions
 	if err := c.ShouldBindJSON(&payload); err != nil {
+		log.Println("QuestionsController.CreateQuestionsHandler:", err.Error())
 		common.SendErrorResponse(c, http.StatusBadRequest, "invalid json"+err.Error())
 	}
 	payloads, err := q.questionsUC.CreateQuestionsUC(payload)

@@ -4,21 +4,22 @@ const (
 	SelectSchedulePagination = `
 	SELECT id, user_id, date, start_time, end_time, documentation
 	FROM schedules
+  WHERE deleted_at IS NULL
 	ORDER BY created_at DESC
 	LIMIT $1 OFFSET $2`
 
 	// User
 	InsertUser           = `INSERT INTO users (name,email,password,role) VALUES ($1,$2,$3,$4) RETURNING id`
-	SelectUserPagination = `SELECT id, name, email, role FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2 WHERE deleted_at IS NULL`
+	SelectUserPagination = `SELECT id, name, email, role FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $1 OFFSET $2`
 	SelectUserByID       = `SELECT id, name, email, role FROM users WHERE id = $1 AND deleted_at IS NULL`
 	SelectUserByEmail    = `SELECT id, name, email, role FROM users WHERE email = $1 AND deleted_at IS NULL`
-	SelectUserByRole     = `SELECT id, name, email, role FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2 WHERE role = $3 AND deleted_at IS NULL`
+	SelectUserByRole     = `SELECT id, name, email, role FROM users WHERE role = $3 AND deleted_at IS NULL ORDER BY created_at DESC LIMIT $1 OFFSET $2 `
 	UpdateUser           = `UPDATE users SET name = $1, email = $2, password = $3, role = $4, updated_at = $5 WHERE id = $6`
 	DeleteUser           = `UPDATE users SET deleted_at = $1 WHERE id = $2`
 
 	// Questions
 	InsertQuestions     = `INSERT INTO questions (id,schedule_id,description) VALUES ($1,$2,$3,'PROCESSED') RETURNING id`
-	SelectQuestionsByID = `SELECT id, schedule_id, description, status FROM questions WHERE id = $1`
+	SelectQuestionsByID = `SELECT id, schedule_id, description, status FROM questions WHERE id = $1 AND deleted_at IS NULL`
 	DeleteQuestions     = `UPDATE questions SET deleted_at = $1 WHERE id = $2`
 	UpdateQuestions     = `UPDATE questions SET status = $1, updated_at = $2 WHERE id = $3`
 
@@ -27,6 +28,6 @@ const (
 	SelectScheduleByID = `SELECT id, user_id, date, start_time, end_time, documentation FROM schedules WHERE id = $1`
 	DeleteSchedule     = `UPDATE schedules SET deleted_at = $1 WHERE id = $2`
 
-    // Attendance 
-	DeleteAttendance     = `UPDATE attendances SET deleted_at = $1 WHERE id = $2`
+	// Attendance
+	DeleteAttendance = `UPDATE attendances SET deleted_at = $1 WHERE id = $2`
 )

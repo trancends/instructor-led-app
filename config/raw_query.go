@@ -19,4 +19,5 @@ const (
 	InsertSchedule       = `INSERT INTO schedules (user_id, date, start_time, end_time, documentation) VALUES ($1, $2, $3, $4, $5) RETURNING id,user_id, date, start_time, end_time, documentation`
 	SelectScheduleByID   = `SELECT id, user_id, date, start_time, end_time, documentation FROM schedules WHERE id = $1`
 	DeleteSchedule       = `UPDATE schedules SET deleted_at = $1 WHERE id = $2`
+	DeleteAttendance     = `UPDATE attendances SET deleted_at = $1 WHERE id = $2`
 )

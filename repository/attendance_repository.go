@@ -2,9 +2,12 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
+	"time"
 
+	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/model"
 )
 
@@ -13,10 +16,35 @@ type AttendanceRepository interface {
 	List() ([]model.Attendance, error)
 	Create(user_id string, schedule_id string) (model.Attendance, error)
 	GetByID(user_id string, schedule_id string) (model.Attendance, error)
+	DeleteAttendance(id string) error
 }
 
 type attendanceRepository struct {
 	db *sql.DB
+}
+
+// DeleteAttandace implements AttendanceRepository.
+func (a *attendanceRepository) DeleteAttendance(id string) error {
+	deleteAt := time.Now().Local()
+
+	result, err := a.db.Exec(config.DeleteAttendance, deleteAt, id)
+	if err != nil {
+		log.Println("attendanceRepository.DeleteAttendance:", err.Error())
+		return err
+	}
+
+	// Check the affected rows to ensure a record was soft deleted
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("attendanceRepository.DeleteAttendance - RowsAffected:", err.Error())
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("no attendance record found with the given ID")
+	}
+
+	return nil
 }
 
 // GetByID implements AttendanceRepository.

@@ -3,11 +3,13 @@ package usecase
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/repository"
+	"github.com/google/uuid"
 )
 
 // AttendanceUsecase represents the usecase for attendance operations.
@@ -15,10 +17,20 @@ type AttendanceUsecase interface {
 	GetAttendance(id string) (model.Attendance, error)
 	ListAttendances() ([]model.Attendance, error)
 	AddAttendance(user_id string, schedule_id string) (model.Attendance, error)
+	DeleteAttandace(id string) error
 }
 
 type attendanceUsecase struct {
 	attendanceRepo repository.AttendanceRepository
+}
+
+// DeleteAttandace implements AttendanceUsecase.
+func (a *attendanceUsecase) DeleteAttandace(id string) error {
+	if _, err := uuid.Parse(id); err != nil {
+		return errors.New("invalid ID format")
+	}
+
+	return a.attendanceRepo.DeleteAttendance(id)
 }
 
 // AddAttendance implements AttendanceUsecase.

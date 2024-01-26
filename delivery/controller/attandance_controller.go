@@ -25,6 +25,7 @@ func (a *AttandanceController) Route() {
 	a.rg.GET("/attendance", a.GetAllAttendanceHandler)
 	a.rg.GET("/attendance/:id", a.GetAttendanceByID)
 	a.rg.POST("/attendance", a.AddAttendanceHandler)
+	a.rg.DELETE("/attendance/:id", a.DeleteAttendanceHandler)
 }
 
 func (a *AttandanceController) GetAllAttendanceHandler(c *gin.Context) {
@@ -61,4 +62,14 @@ func (a *AttandanceController) AddAttendanceHandler(c *gin.Context) {
 		return
 	}
 	common.SendSingleResponse(c, createdAttendance, "attendance created successfully")
+}
+
+func (a *AttandanceController) DeleteAttendanceHandler(c *gin.Context) {
+	id := c.Param("id")
+	err := a.attendanceUC.DeleteAttandace(id)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to delete attendance")
+		return
+	}
+	common.SendSingleResponse(c, id, "attendance deleted successfully")
 }

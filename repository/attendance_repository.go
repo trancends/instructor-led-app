@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
+	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/model"
 )
 
@@ -13,10 +15,28 @@ type AttendanceRepository interface {
 	List() ([]model.Attendance, error)
 	Create(user_id string, schedule_id string) (model.Attendance, error)
 	GetByID(user_id string, schedule_id string) (model.Attendance, error)
+	DeleteSoft(user_id string) error
 }
 
 type attendanceRepository struct {
 	db *sql.DB
+}
+
+// DeleteSoft implements AttendanceRepository.
+func (a *attendanceRepository) DeleteSoft(user_id string) error {
+	deleted_at := time.Now().Local()
+	result, err := a.db.Exec(config.DeleteAttendance, deleted_at, user_id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // GetByID implements AttendanceRepository.

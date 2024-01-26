@@ -15,4 +15,5 @@ const (
 	SelectUserByRole     = `SELECT id, name, email, role FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2 WHERE role = $3 AND deleted_at IS NULL`
 	UpdateUser           = `UPDATE users SET name = $1, email = $2, password = $3, role = $4, updated_at = $5 WHERE id = $6`
 	DeleteUser           = `UPDATE users SET deleted_at = $1 WHERE id = $2`
+	DeleteAttendance     = `UPDATE attendances SET deleted_at = $1 WHERE user_id = $2 AND deleted_at IS NULL`
 )

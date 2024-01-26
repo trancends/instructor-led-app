@@ -33,7 +33,7 @@ func (q *questionsRepository) CreateQuestions(payload model.Question) (model.Que
 	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&questions.ID, &questions.ScheduleID, &questions.Description, &questions.CreatedAt, &questions.UpdatedAt)
+		err := rows.Scan(&questions.ID)
 		if err != nil {
 			log.Println("questionsRepository.Scan:", err.Error())
 		}

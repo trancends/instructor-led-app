@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/model"
@@ -11,7 +12,10 @@ import (
 type QuestionsRepository interface {
 	CreateQuestions(payload model.Question) (model.Question, error)
 	Get(date string) ([]*model.Schedule, error)
+	GetByID(id string) (model.Question, error)
 	List() ([]model.Question, error)
+	Delete(id string) error
+	UpdateStatus(payload model.Question) error
 }
 
 type questionsRepository struct {
@@ -132,6 +136,40 @@ func (q *questionsRepository) Get(date string) ([]*model.Schedule, error) {
 	}
 
 	return ScheduleSlice, nil
+}
+
+// GetByID implements QuestionsRepository.
+func (q *questionsRepository) GetByID(id string) (model.Question, error) {
+	var question model.Question
+	err := q.db.QueryRow(config.SelectQuestionsByID, id).Scan(&question.ID, &question.Description, &question.Status)
+	if err != nil {
+		log.Println("questionsRepository.GetByID:", err.Error())
+		return question, err
+	}
+	return question, nil
+}
+
+// Delete implements QuestionsRepository.
+// Soft Delete
+func (q *questionsRepository) Delete(id string) error {
+	deletedAt := time.Now().Local()
+	_, err := q.db.Exec(config.DeleteQuestions, deletedAt, id)
+	if err != nil {
+		log.Println("questionsRepository.Delete:", err.Error())
+		return err
+	}
+	return nil
+}
+
+// Update implements QuestionsRepository.
+func (q *questionsRepository) UpdateStatus(payload model.Question) error {
+	updated_at := time.Now().Local()
+	_, err := q.db.Exec(config.UpdateQuestions, payload.Status, updated_at, payload.ID)
+	if err != nil {
+		log.Println("questionsRepository.Update:", err.Error())
+		return err
+	}
+	return nil
 }
 
 func NewQuestionsRepository(db *sql.DB) QuestionsRepository {

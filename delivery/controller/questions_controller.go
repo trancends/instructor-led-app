@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"time"
@@ -28,6 +29,8 @@ func (q *QuestionsController) Route() {
 	q.rg.GET("/questions", q.GetQuestionsHandler)
 	q.rg.GET("/questions/all", q.ListQuestionsHandler)
 	q.rg.POST("/questions", q.CreateQuestionsHandler)
+	q.rg.PATCH("/questions", q.PatchQuestionsHandler)
+	q.rg.DELETE("/questions/:id", q.DeleteQuestionsHandler)
 }
 
 func (q *QuestionsController) CreateQuestionsHandler(c *gin.Context) {
@@ -78,4 +81,50 @@ func (q *QuestionsController) ListQuestionsHandler(c *gin.Context) {
 		return
 	}
 	common.SendSingleResponse(c, questions, "questions retrieved successfully")
+}
+
+func (q *QuestionsController) PatchQuestionsHandler(c *gin.Context) {
+	var payload model.Question
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		log.Println("QuestionsController.PatchQuestionsHandler:", err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid json"+err.Error())
+		return
+	}
+
+	if payload.ID == "" || payload.Status == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "payload cannot be empty")
+		return
+	}
+
+	err := q.questionsUC.UpdateQuestionStatus(payload)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.SendErrorResponse(c, http.StatusNotFound, "questions not found")
+		} else {
+			common.SendErrorResponse(c, http.StatusInternalServerError, "failed to update questions"+err.Error())
+		}
+		return
+	}
+
+	common.SendSingleResponse(c, "", "questions updated successfully")
+}
+
+func (q *QuestionsController) DeleteQuestionsHandler(c *gin.Context) {
+	questionID := c.Param("id")
+	if questionID == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "id cannot be empty")
+		return
+	}
+
+	err := q.questionsUC.DeleteQuestion(questionID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.SendErrorResponse(c, http.StatusNotFound, "questions not found")
+		} else {
+			common.SendErrorResponse(c, http.StatusInternalServerError, "failed to delete questions"+err.Error())
+		}
+		return
+	}
+
+	common.SendSingleResponse(c, "", "questions deleted successfully")
 }

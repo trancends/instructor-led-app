@@ -7,7 +7,7 @@ type Status struct {
 
 type SingleResponse struct {
 	Status Status      `json:"status"`
-	Data   interface{} `json:"data"`
+	Data   interface{} `json:"data,omitempty"`
 }
 
 type PagedResponse struct {

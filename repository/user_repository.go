@@ -38,7 +38,7 @@ func (u *userRepository) Create(payload model.User) error {
 	user.CreatedAt = currTime
 	user.UpdatedAt = currTime
 
-	err = u.db.QueryRow(config.InsertUser, user.Name, user.Email, user.Password, user.Role, user.CreatedAt, user.UpdatedAt).Scan(&user.ID)
+	err = u.db.QueryRow(config.InsertUser, user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
 	if err != nil {
 		log.Println("err at inserting user", err)
 		return err

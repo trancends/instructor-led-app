@@ -1,11 +1,11 @@
-// controller/questions_controller.go
 package controller
 
 import (
 	"log"
 	"net/http"
+	"enigmaCamp.com/instructor_led/model"
+	"enigmaCamp.com/instructor_led/shared/common"
 	"time"
-
 	"enigmaCamp.com/instructor_led/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -24,8 +24,22 @@ func NewQuestionsController(questionsUC usecase.QuestionsUsecase, rg *gin.Router
 }
 
 func (q *QuestionsController) Route() {
-	q.rg.GET("/question", q.GetQuestionsHandler)
-	q.rg.GET("/question/all", q.ListQuestionsHandler)
+	q.rg.GET("/questions", q.GetQuestionsHandler)
+	q.rg.GET("/questions/all", q.ListQuestionsHandler)
+	q.rg.POST("/questions", q.CreateQuestionsHandler)
+}
+
+func (q *QuestionsController) CreateQuestionsHandler(c *gin.Context) {
+	var payload model.Questions
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		log.Println("QuestionsController.CreateQuestionsHandler:", err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid json"+err.Error())
+	}
+	payloads, err := q.questionsUC.CreateQuestionsUC(payload)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to create questions"+err.Error())
+	}
+	common.SendSingleResponse(c, payloads, "questions created successfully")
 }
 
 func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {

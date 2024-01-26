@@ -16,7 +16,7 @@ import (
 
 type Server struct {
 	scheduleUC   usecase.ShecdulesUseCase
-	userUC usecase.UserUsecase
+	userUC       usecase.UserUsecase
 	questionsUC  usecase.QuestionsUsecase
 	attendanceUC usecase.AttendanceUsecase
 	engine       *gin.Engine
@@ -77,7 +77,7 @@ func NewServer() *Server {
 
 	return &Server{
 		scheduleUC:   schedulesUseCase,
-		userUC: userUseCase,
+		userUC:       userUseCase,
 		questionsUC:  questionsUseCase,
 		attendanceUC: attendanceUseCase,
 		engine:       engine,

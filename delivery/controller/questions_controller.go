@@ -38,6 +38,7 @@ func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {
 		log.Printf("Invalid date format: %v\n", err)
 		if date == "" {
 			common.SendErrorResponse(c, http.StatusBadRequest, "Date is required")
+			return
 		}
 		common.SendErrorResponse(c, http.StatusBadRequest, "Invalid date format")
 	}
@@ -59,6 +60,7 @@ func (q *QuestionsController) ListQuestionsHandler(c *gin.Context) {
 	log.Println(questions)
 	if err != nil {
 		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
 	common.SendSingleResponse(c, questions, "success")
 }

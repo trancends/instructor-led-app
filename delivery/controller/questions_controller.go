@@ -74,8 +74,8 @@ func (q *QuestionsController) ListQuestionsHandler(c *gin.Context) {
 	questions, err := q.questionsUC.ListQuestions()
 	log.Println(questions)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve questions"})
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to list questions"+err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"questions": questions})
+	common.SendSingleResponse(c, questions, "questions retrieved successfully")
 }

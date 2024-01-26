@@ -12,7 +12,7 @@ const (
 	InsertUser           = `INSERT INTO users (name,email,password,role) VALUES ($1,$2,$3,$4) RETURNING id`
 	SelectUserPagination = `SELECT id, name, email, role FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $1 OFFSET $2`
 	SelectUserByID       = `SELECT id, name, email, role FROM users WHERE id = $1 AND deleted_at IS NULL`
-	SelectUserByEmail    = `SELECT id, name, email, role FROM users WHERE email = $1 AND deleted_at IS NULL`
+	SelectUserByEmail    = `SELECT id, name, email, password, role FROM users WHERE email = $1 AND deleted_at IS NULL`
 	SelectUserByRole     = `SELECT id, name, email, role FROM users WHERE role = $3 AND deleted_at IS NULL ORDER BY created_at DESC LIMIT $1 OFFSET $2 `
 	UpdateUser           = `UPDATE users SET name = $1, email = $2, password = $3, role = $4, updated_at = $5 WHERE id = $6`
 	DeleteUser           = `UPDATE users SET deleted_at = $1 WHERE id = $2`

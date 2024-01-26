@@ -3,9 +3,10 @@ package controller
 import (
 	"log"
 	"net/http"
+	"time"
+
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
-	"time"
 	"enigmaCamp.com/instructor_led/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +31,7 @@ func (q *QuestionsController) Route() {
 }
 
 func (q *QuestionsController) CreateQuestionsHandler(c *gin.Context) {
-	var payload model.Questions
+	var payload model.Question
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		log.Println("QuestionsController.CreateQuestionsHandler:", err.Error())
 		common.SendErrorResponse(c, http.StatusBadRequest, "invalid json"+err.Error())

@@ -1,10 +1,12 @@
 package usecase
 
 import (
+	"fmt"
 	"log"
 
 	"enigmaCamp.com/instructor_led/model/dto"
 	"enigmaCamp.com/instructor_led/shared/service"
+	"enigmaCamp.com/instructor_led/shared/utils"
 )
 
 type AuthUseCase interface {
@@ -29,8 +31,8 @@ func (a *authUseCase) Login(payload dto.AuthRequestDTO) (dto.AuthResponseDTO, er
 	log.Println("authUC.FindAuthorByEmail", author)
 	log.Println(payload.Password == author.Password)
 
-	if payload.Password != author.Password {
-		return dto.AuthResponseDTO{}, err
+	if utils.CheckPassword(payload.Password, author.Password) {
+		return dto.AuthResponseDTO{}, fmt.Errorf("wrong password")
 	}
 	log.Println("password correct")
 

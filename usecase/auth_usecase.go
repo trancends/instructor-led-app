@@ -24,20 +24,20 @@ type authUseCase struct {
 // }
 
 func (a *authUseCase) Login(payload dto.AuthRequestDTO) (dto.AuthResponseDTO, error) {
-	author, err := a.userUC.GetUserByEmail(payload.Email)
+	user, err := a.userUC.GetUserByEmail(payload.Email)
 	if err != nil {
 		return dto.AuthResponseDTO{}, err
 	}
-	log.Println("authUC.FindAuthorByEmail", author)
-	log.Println(payload.Password == author.Password)
+	log.Println("authUC.FindAuthorByEmail", user)
+	log.Println(payload.Password == user.Password)
 
-	if utils.CheckPassword(payload.Password, author.Password) {
+	if !utils.CheckPassword(payload.Password, user.Password) {
 		return dto.AuthResponseDTO{}, fmt.Errorf("wrong password")
 	}
 	log.Println("password correct")
 
 	// TODO generate jwt
-	tokenDto, err := a.jwtService.GenerateToken(author)
+	tokenDto, err := a.jwtService.GenerateToken(user)
 	log.Println("TokenDto")
 	log.Println(tokenDto)
 	if err != nil {

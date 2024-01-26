@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,7 +31,11 @@ func (a *AuthController) loginHandler(c *gin.Context) {
 	response, err := a.authUC.Login(payload)
 	fmt.Println(response)
 	if err != nil {
-		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		if err == sql.ErrNoRows {
+			common.SendErrorResponse(c, http.StatusBadRequest, "user not found")
+			return
+		}
+		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	common.SendSingleResponse(c, response, "login success")

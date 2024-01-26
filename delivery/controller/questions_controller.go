@@ -1,4 +1,3 @@
-// controller/questions_controller.go
 package controller
 
 import (
@@ -6,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
 	"enigmaCamp.com/instructor_led/usecase"
 	"github.com/gin-gonic/gin"
@@ -25,8 +25,22 @@ func NewQuestionsController(questionsUC usecase.QuestionsUsecase, rg *gin.Router
 }
 
 func (q *QuestionsController) Route() {
-	q.rg.GET("/question", q.GetQuestionsHandler)
-	q.rg.GET("/question/all", q.ListQuestionsHandler)
+	q.rg.GET("/questions", q.GetQuestionsHandler)
+	q.rg.GET("/questions/all", q.ListQuestionsHandler)
+	q.rg.POST("/questions", q.CreateQuestionsHandler)
+}
+
+func (q *QuestionsController) CreateQuestionsHandler(c *gin.Context) {
+	var payload model.Question
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		log.Println("QuestionsController.CreateQuestionsHandler:", err.Error())
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid json"+err.Error())
+	}
+	payloads, err := q.questionsUC.CreateQuestionsUC(payload)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to create questions"+err.Error())
+	}
+	common.SendSingleResponse(c, payloads, "questions created successfully")
 }
 
 func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {
@@ -37,30 +51,31 @@ func (q *QuestionsController) GetQuestionsHandler(c *gin.Context) {
 	if err != nil {
 		log.Printf("Invalid date format: %v\n", err)
 		if date == "" {
-			common.SendErrorResponse(c, http.StatusBadRequest, "Date is required")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Date is required"})
 			return
 		}
-		common.SendErrorResponse(c, http.StatusBadRequest, "Invalid date format")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Expected format: 2006-01-02"})
+		return
 	}
 
 	schedules, err := q.questionsUC.GetQuestion(date)
 	log.Println(schedules)
 	if err != nil {
 		log.Printf("Error retrieving schedules for date %s: %v\n", date, err)
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve questions"})
 		return
 	}
 
 	// Return the list of schedules as JSON
-	common.SendSingleResponse(c, schedules, "success")
+	c.JSON(http.StatusOK, gin.H{"schedules": schedules})
 }
 
 func (q *QuestionsController) ListQuestionsHandler(c *gin.Context) {
 	questions, err := q.questionsUC.ListQuestions()
 	log.Println(questions)
 	if err != nil {
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to list questions"+err.Error())
 		return
 	}
-	common.SendSingleResponse(c, questions, "success")
+	common.SendSingleResponse(c, questions, "questions retrieved successfully")
 }

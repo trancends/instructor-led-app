@@ -1,20 +1,40 @@
-// questions/repository/repository.go
 package repository
 
 import (
 	"database/sql"
 	"log"
 
+	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/model"
 )
 
 type QuestionsRepository interface {
+	CreateQuestions(payload model.Question) (model.Question, error)
 	Get(date string) ([]*model.Schedule, error)
 	List() ([]model.Question, error)
 }
 
 type questionsRepository struct {
 	db *sql.DB
+}
+
+// CreateQuestions implements QuestionsRepository.
+func (q *questionsRepository) CreateQuestions(payload model.Question) (model.Question, error) {
+	var questions model.Question
+	rows, err := q.db.Query(config.InsertQuestions)
+	if err != nil {
+		log.Println("questionsRepository.Query:", err.Error())
+		return questions, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&questions.ID, &questions.ScheduleID, &questions.Description, &questions.CreatedAt, &questions.UpdatedAt)
+		if err != nil {
+			log.Println("questionsRepository.Scan:", err.Error())
+		}
+	}
+	return questions, nil
 }
 
 // List implements QuestionsRepository.
@@ -90,7 +110,6 @@ func (q *questionsRepository) Get(date string) ([]*model.Schedule, error) {
 			&question.Description,
 			&question.Status,
 		)
-
 		if err != nil {
 			log.Println("questionsRepository.Get:", err.Error())
 			return nil, err

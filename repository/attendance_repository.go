@@ -15,7 +15,7 @@ type AttendanceRepository interface {
 	List() ([]model.Attendance, error)
 	Create(user_id string, schedule_id string) (model.Attendance, error)
 	GetByID(user_id string, schedule_id string) (model.Attendance, error)
-	DeleteSoft(user_id string) error
+	DeleteSoft(id string) error
 }
 
 type attendanceRepository struct {
@@ -23,9 +23,9 @@ type attendanceRepository struct {
 }
 
 // DeleteSoft implements AttendanceRepository.
-func (a *attendanceRepository) DeleteSoft(user_id string) error {
+func (a *attendanceRepository) DeleteSoft(id string) error {
 	deleted_at := time.Now().Local()
-	result, err := a.db.Exec(config.DeleteAttendance, deleted_at, user_id)
+	result, err := a.db.Exec(config.DeleteAttendance, deleted_at, id)
 	if err != nil {
 		return err
 	}

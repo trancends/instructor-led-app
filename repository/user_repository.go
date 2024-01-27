@@ -9,6 +9,7 @@ import (
 	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/model"
 	sharedmodel "enigmaCamp.com/instructor_led/shared/shared_model"
+	"enigmaCamp.com/instructor_led/shared/utils"
 )
 
 type UserRepository interface {
@@ -34,9 +35,7 @@ func NewUserRepository(db *sql.DB) UserRepository {
 func (u *userRepository) Create(payload model.User) error {
 	var err error
 	user := payload
-	currTime := time.Now().Local()
-	user.CreatedAt = currTime
-	user.UpdatedAt = currTime
+	user.Password, _ = utils.GetHashPassword(user.Password)
 
 	err = u.db.QueryRow(config.InsertUser, user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
 	if err != nil {
@@ -87,7 +86,7 @@ func (u *userRepository) List(page int, size int) ([]model.User, sharedmodel.Pag
 
 func (u *userRepository) GetUserByEmail(email string) (model.User, error) {
 	var user model.User
-	err := u.db.QueryRow(config.SelectUserByEmail, email).Scan(&user.ID, &user.Name, &user.Email, &user.Role)
+	err := u.db.QueryRow(config.SelectUserByEmail, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		log.Println("userRepository Query SelectUserByEmail:", err.Error())
 		return model.User{}, err
@@ -147,9 +146,9 @@ func (u *userRepository) Update(payload model.User) error {
 	var err error
 	user := payload
 	currTime := time.Now().Local()
-	user.UpdatedAt = currTime
+	user.UpdatedAt = &currTime
 
-	_, err = u.db.Exec(config.UpdateUser, user.Name, user.Email, user.Password, user.Role, user.UpdatedAt, user.ID)
+	_, err = u.db.Exec(config.UpdateUser, user.Name, user.Email, user.Password, user.UpdatedAt, user.ID)
 	if err != nil {
 		log.Println("err at updating user", err)
 		return err

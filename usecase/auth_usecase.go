@@ -7,6 +7,7 @@ import (
 	"enigmaCamp.com/instructor_led/model/dto"
 	"enigmaCamp.com/instructor_led/shared/service"
 	"enigmaCamp.com/instructor_led/shared/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthUseCase interface {
@@ -29,17 +30,17 @@ func (a *authUseCase) Login(payload dto.AuthRequestDTO) (dto.AuthResponseDTO, er
 		return dto.AuthResponseDTO{}, err
 	}
 	log.Println("authUC.FindAuthorByEmail", user)
-	log.Println(payload.Password == user.Password)
 
-	if !utils.CheckPassword(payload.Password, user.Password) {
+	test := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
+	log.Println("bcrypt returned: ", test)
+	if !utils.CheckPassword(user.Password, payload.Password) {
 		return dto.AuthResponseDTO{}, fmt.Errorf("wrong password")
 	}
 	log.Println("password correct")
 
 	// TODO generate jwt
 	tokenDto, err := a.jwtService.GenerateToken(user)
-	log.Println("TokenDto")
-	log.Println(tokenDto)
+	log.Println("TokenDto", tokenDto)
 	if err != nil {
 		return dto.AuthResponseDTO{}, err
 	}

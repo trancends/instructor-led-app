@@ -2,7 +2,9 @@ package controller
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/mail"
@@ -28,6 +30,7 @@ func NewUserController(userUC usecase.UserUsecase, rg *gin.RouterGroup) *UserCon
 }
 
 func (u *UserController) Route() {
+	u.rg.POST("/users/csv", u.CreateUserCSVHandler)
 	u.rg.POST("/users", u.CreateUserHanlder)
 	u.rg.GET("/users", u.GetAllUserHandler)
 	u.rg.GET("/users/:email", u.GetUserByEmailHandler)
@@ -176,4 +179,52 @@ func (u *UserController) DeleteUserHandler(c *gin.Context) {
 	}
 
 	common.SendSingleResponse(c, userId, "user deleted successfully")
+}
+
+func (u *UserController) CreateUserCSVHandler(c *gin.Context) {
+	// parse the form
+	err := c.Request.ParseMultipartForm(10 << 20)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid form"+err.Error())
+		return
+	}
+	// get the file from the form
+	file, _, err := c.Request.FormFile("csv")
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid file"+err.Error())
+		return
+	}
+	defer file.Close()
+
+	// parse the CSV file
+	reader := csv.NewReader(file)
+	var users []model.User
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			common.SendErrorResponse(c, http.StatusInternalServerError, "failed to read csv"+err.Error())
+			return
+		}
+		var user model.User
+		user.Name = record[0]
+		user.Email = record[1]
+		user.Password, err = utils.GetHashPassword(record[2])
+		if err != nil {
+			common.SendErrorResponse(c, http.StatusInternalServerError, "failed to hash password"+err.Error())
+			return
+		}
+		user.Role = record[3]
+
+		users = append(users, user)
+	}
+
+	err = u.userUC.CreateUserCSV(users)
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to create user"+err.Error())
+		return
+	}
+	common.SendSingleResponse(c, "", "users created successfully")
 }

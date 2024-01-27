@@ -29,10 +29,10 @@ func NewQuestionsController(questionsUC usecase.QuestionsUsecase, rg *gin.Router
 }
 
 func (q *QuestionsController) Route() {
-	q.rg.GET("/questions", q.GetQuestionsHandler)
-	q.rg.GET("/questions/all", q.ListQuestionsHandler)
-	q.rg.POST("/questions", q.CreateQuestionsHandler)
-	q.rg.PATCH("/questions", q.PatchQuestionsHandler)
+	q.rg.GET("/questions", q.authMiddleware.RequireToken("ADMIN", "TRAINER"), q.GetQuestionsHandler)
+	q.rg.GET("/questions/all", q.authMiddleware.RequireToken("ADMIN", "TRAINER"), q.ListQuestionsHandler)
+	q.rg.POST("/questions", q.authMiddleware.RequireToken("ADMIN", "TRAINER", "PARTICIPANT"), q.CreateQuestionsHandler)
+	q.rg.PATCH("/questions", q.authMiddleware.RequireToken("ADMIN", "TRAINER"), q.PatchQuestionsHandler)
 	q.rg.DELETE("/questions/:id", q.authMiddleware.RequireToken("ADMIN"), q.DeleteQuestionsHandler)
 }
 

@@ -29,9 +29,9 @@ func NewSchedulesController(schedulesUC usecase.ShecdulesUseCase, rg *gin.Router
 }
 
 func (s *SchedulesController) Route() {
-	s.rg.GET("/schedules", s.FindAllScheduleHandler)
-	s.rg.POST("/schedules", s.CreateScheduleHandler)
-	s.rg.GET("/schedules/:id", s.FindByIDScheduleHandler)
+	s.rg.GET("/schedules", s.authMiddleware.RequireToken("ADMIN", "TRAINER"), s.FindAllScheduleHandler)
+	s.rg.POST("/schedules", s.authMiddleware.RequireToken("ADMIN", "TRAINER"), s.CreateScheduleHandler)
+	s.rg.GET("/schedules/:id", s.authMiddleware.RequireToken("ADMIN", "TRAINER", "PARTICIPANT"), s.FindByIDScheduleHandler)
 	s.rg.DELETE("/schedules/:id", s.authMiddleware.RequireToken("ADMIN"), s.DeleteScheduleHandler)
 }
 func (s *SchedulesController) CreateScheduleHandler(c *gin.Context) {

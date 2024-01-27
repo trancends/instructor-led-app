@@ -25,9 +25,9 @@ func NewAttandanceController(rg *gin.RouterGroup, attendanceUC usecase.Attendanc
 }
 
 func (a *AttandanceController) Route() {
-	a.rg.GET("/attendance", a.GetAllAttendanceHandler)
-	a.rg.GET("/attendance/:id", a.GetAttendanceByID)
-	a.rg.POST("/attendance", a.AddAttendanceHandler)
+	a.rg.GET("/attendance", a.authMiddleware.RequireToken("ADMIN", "TRAINER"), a.GetAllAttendanceHandler)
+	a.rg.GET("/attendance/:id", a.authMiddleware.RequireToken("ADMIN", "TRAINER", "PARTICIPANT"), a.GetAttendanceByID)
+	a.rg.POST("/attendance", a.authMiddleware.RequireToken("ADMIN", "TRAINER"), a.AddAttendanceHandler)
 	a.rg.DELETE("/attendance/:id", a.authMiddleware.RequireToken("ADMIN"), a.DeleteAttendanceHandler)
 }
 

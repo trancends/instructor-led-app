@@ -31,14 +31,6 @@ func (s *Server) initRoute() {
 	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
 	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
-
-	// Use a defer statement to log any panics that might occur during route initialization
-	defer func() {
-		if r := recover(); r != nil {
-			log.Printf("Panic during route initialization: %v\n", r)
-		}
-	}()
-
 	controller.NewUserController(s.userUC, rg, authMiddleware).Route()
 	controller.NewSchedulesController(s.scheduleUC, rg, authMiddleware).Route()
 	controller.NewQuestionsController(s.questionsUC, rg, authMiddleware).Route()

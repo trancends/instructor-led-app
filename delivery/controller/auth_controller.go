@@ -21,24 +21,27 @@ func (a *AuthController) loginHandler(c *gin.Context) {
 	log.Println("hit loginHandler")
 	var payload dto.AuthRequestDTO
 	err := c.ShouldBindJSON(&payload)
-	fmt.Println(payload)
 	if err != nil {
-		log.Println("error at loginHandler", err)
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+		log.Println("error at loginHandler - Unable to bind JSON payload", err)
+		common.SendErrorResponse(c, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+
 	// send payload to usecase
 	response, err := a.authUC.Login(payload)
-	fmt.Println(response)
 	if err != nil {
+		log.Println("error at loginHandler - AuthUseCase login failed", err)
+
 		if err == sql.ErrNoRows {
-			common.SendErrorResponse(c, http.StatusBadRequest, "user not found")
+			common.SendErrorResponse(c, http.StatusBadRequest, "User not found")
 			return
 		}
-		common.SendErrorResponse(c, http.StatusBadRequest, err.Error())
+
+		common.SendErrorResponse(c, http.StatusBadRequest, fmt.Sprintf("Login failed: %v", err))
 		return
 	}
-	common.SendSingleResponse(c, response, "login success")
+
+	common.SendSingleResponse(c, response, "Login success")
 }
 
 func (a *AuthController) Route() {

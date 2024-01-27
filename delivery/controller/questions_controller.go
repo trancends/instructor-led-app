@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"enigmaCamp.com/instructor_led/delivery/middleware"
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
 	"enigmaCamp.com/instructor_led/usecase"
@@ -13,15 +14,17 @@ import (
 )
 
 type QuestionsController struct {
-	questionsUC usecase.QuestionsUsecase
-	rg          *gin.RouterGroup
+	questionsUC    usecase.QuestionsUsecase
+	rg             *gin.RouterGroup
+	authMiddleware middleware.AuthMiddleware
 }
 
 // NewQuestionsController initializes a new QuestionsController.
-func NewQuestionsController(questionsUC usecase.QuestionsUsecase, rg *gin.RouterGroup) *QuestionsController {
+func NewQuestionsController(questionsUC usecase.QuestionsUsecase, rg *gin.RouterGroup, authMiddleware middleware.AuthMiddleware) *QuestionsController {
 	return &QuestionsController{
-		questionsUC: questionsUC,
-		rg:          rg,
+		questionsUC:    questionsUC,
+		rg:             rg,
+		authMiddleware: authMiddleware,
 	}
 }
 
@@ -30,7 +33,7 @@ func (q *QuestionsController) Route() {
 	q.rg.GET("/questions/all", q.ListQuestionsHandler)
 	q.rg.POST("/questions", q.CreateQuestionsHandler)
 	q.rg.PATCH("/questions", q.PatchQuestionsHandler)
-	q.rg.DELETE("/questions/:id", q.DeleteQuestionsHandler)
+	q.rg.DELETE("/questions/:id", q.authMiddleware.RequireToken("ADMIN"), q.DeleteQuestionsHandler)
 }
 
 func (q *QuestionsController) CreateQuestionsHandler(c *gin.Context) {

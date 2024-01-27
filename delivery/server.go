@@ -7,6 +7,7 @@ import (
 
 	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/delivery/controller"
+	"enigmaCamp.com/instructor_led/delivery/middleware"
 	repository "enigmaCamp.com/instructor_led/repository"
 	"enigmaCamp.com/instructor_led/shared/service"
 	"enigmaCamp.com/instructor_led/usecase"
@@ -29,10 +30,11 @@ type Server struct {
 func (s *Server) initRoute() {
 	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
-	controller.NewUserController(s.userUC, rg).Route()
-	controller.NewSchedulesController(s.scheduleUC, rg).Route()
-	controller.NewQuestionsController(s.questionsUC, rg).Route()
-	controller.NewAttandanceController(rg, s.attendanceUC).Route()
+	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
+	controller.NewUserController(s.userUC, rg, authMiddleware).Route()
+	controller.NewSchedulesController(s.scheduleUC, rg, authMiddleware).Route()
+	controller.NewQuestionsController(s.questionsUC, rg, authMiddleware).Route()
+	controller.NewAttandanceController(rg, s.attendanceUC, authMiddleware).Route()
 	controller.NewAuthController(s.authUC, rg).Route()
 }
 
@@ -76,8 +78,7 @@ func NewServer() *Server {
 	attendanceRepository := repository.NewAttendanceRepository(db)
 	attendanceUseCase := usecase.NewAttendanceUsecase(attendanceRepository)
 	jwtService := service.NewJwtService(cfg.TokenConfig)
-	authUseCase := usecase.NewAuthUseCase(userUseCase, jwtService)
-
+	authUC := usecase.NewAuthUseCase(userUseCase, jwtService)
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
@@ -86,7 +87,8 @@ func NewServer() *Server {
 		userUC:       userUseCase,
 		questionsUC:  questionsUseCase,
 		attendanceUC: attendanceUseCase,
-		authUC:       authUseCase,
+		authUC:       authUC,
+		jwtService:   jwtService,
 		engine:       engine,
 		host:         host,
 	}

@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"enigmaCamp.com/instructor_led/delivery/middleware"
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
 	"enigmaCamp.com/instructor_led/usecase"
@@ -10,14 +11,16 @@ import (
 )
 
 type AttandanceController struct {
-	attendanceUC usecase.AttendanceUsecase
-	rg           *gin.RouterGroup
+	attendanceUC   usecase.AttendanceUsecase
+	rg             *gin.RouterGroup
+	authMiddleware middleware.AuthMiddleware
 }
 
-func NewAttandanceController(rg *gin.RouterGroup, attendanceUC usecase.AttendanceUsecase) *AttandanceController {
+func NewAttandanceController(rg *gin.RouterGroup, attendanceUC usecase.AttendanceUsecase, uthMiddleware middleware.AuthMiddleware) *AttandanceController {
 	return &AttandanceController{
-		attendanceUC: attendanceUC,
-		rg:           rg,
+		attendanceUC:   attendanceUC,
+		rg:             rg,
+		authMiddleware: uthMiddleware,
 	}
 }
 
@@ -25,7 +28,7 @@ func (a *AttandanceController) Route() {
 	a.rg.GET("/attendance", a.GetAllAttendanceHandler)
 	a.rg.GET("/attendance/:id", a.GetAttendanceByID)
 	a.rg.POST("/attendance", a.AddAttendanceHandler)
-	a.rg.DELETE("/attendance/:id", a.DeleteAttendanceHandler)
+	a.rg.DELETE("/attendance/:id", a.authMiddleware.RequireToken("ADMIN"), a.DeleteAttendanceHandler)
 }
 
 func (a *AttandanceController) GetAllAttendanceHandler(c *gin.Context) {

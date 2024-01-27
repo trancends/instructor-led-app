@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"enigmaCamp.com/instructor_led/delivery/middleware"
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
 	"enigmaCamp.com/instructor_led/usecase"
@@ -14,14 +15,16 @@ import (
 )
 
 type SchedulesController struct {
-	schedulesUC usecase.ShecdulesUseCase
-	rg          *gin.RouterGroup
+	schedulesUC    usecase.ShecdulesUseCase
+	rg             *gin.RouterGroup
+	authMiddleware middleware.AuthMiddleware
 }
 
-func NewSchedulesController(schedulesUC usecase.ShecdulesUseCase, rg *gin.RouterGroup) *SchedulesController {
+func NewSchedulesController(schedulesUC usecase.ShecdulesUseCase, rg *gin.RouterGroup, authMiddleware middleware.AuthMiddleware) *SchedulesController {
 	return &SchedulesController{
-		schedulesUC: schedulesUC,
-		rg:          rg,
+		schedulesUC:    schedulesUC,
+		rg:             rg,
+		authMiddleware: authMiddleware,
 	}
 }
 
@@ -29,7 +32,7 @@ func (s *SchedulesController) Route() {
 	s.rg.GET("/schedules", s.FindAllScheduleHandler)
 	s.rg.POST("/schedules", s.CreateScheduleHandler)
 	s.rg.GET("/schedules/:id", s.FindByIDScheduleHandler)
-	s.rg.DELETE("/schedules/:id", s.DeleteScheduleHandler)
+	s.rg.DELETE("/schedules/:id", s.authMiddleware.RequireToken("ADMIN"), s.DeleteScheduleHandler)
 }
 func (s *SchedulesController) CreateScheduleHandler(c *gin.Context) {
 	var payload model.Schedule

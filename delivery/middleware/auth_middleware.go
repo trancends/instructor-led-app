@@ -40,20 +40,23 @@ func (a *authMiddleware) RequireToken(roles ...string) gin.HandlerFunc {
 		claims, err := a.jwtService.ParseToken(tokenHeader)
 		if err != nil {
 			log.Printf("RequireToken.ParseToken: %v \n", err.Error())
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
-		ctx.Set("author", claims["authorID"])
+
+		ctx.Set("user", claims["UserID"])
 
 		validRole := false
 		// admin, user, other ...
 		for _, role := range roles {
-			if role == claims["role"] {
+			if role == claims["Role"] {
 				validRole = true
 				break
 			}
 		}
 
 		if !validRole {
-			log.Printf("RequireToken.validRole %v \n", err.Error())
+			log.Printf("RequireToken.validRole: user does not have the required role \n")
 			ctx.AbortWithStatus(http.StatusForbidden)
 			return
 		}

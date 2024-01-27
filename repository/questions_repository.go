@@ -141,7 +141,7 @@ func (q *questionsRepository) Get(date string) ([]*model.Schedule, error) {
 // GetByID implements QuestionsRepository.
 func (q *questionsRepository) GetByID(id string) (model.Question, error) {
 	var question model.Question
-	err := q.db.QueryRow(config.SelectQuestionsByID, id).Scan(&question.ID, &question.Description, &question.Status)
+	err := q.db.QueryRow(config.SelectQuestionsByID, id).Scan(&question.ID, &question.ScheduleID, &question.Description, &question.Status)
 	if err != nil {
 		log.Println("questionsRepository.GetByID:", err.Error())
 		return question, err

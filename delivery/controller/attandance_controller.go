@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"enigmaCamp.com/instructor_led/delivery/middleware"
@@ -35,6 +36,7 @@ func (a *AttandanceController) GetAllAttendanceHandler(c *gin.Context) {
 	// Retrieve data from usecase
 	attendanceList, err := a.attendanceUC.ListAttendances()
 	if err != nil {
+		log.Printf("Error in AttandanceController.GetAllAttendanceHandler: %s\n", err)
 		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to retrieve attendance")
 		return
 	}
@@ -47,6 +49,7 @@ func (a *AttandanceController) GetAttendanceByID(c *gin.Context) {
 	id := c.Param("id")
 	attendance, err := a.attendanceUC.GetAttendance(id)
 	if err != nil {
+		log.Printf("Error in AttandanceController.GetAttendanceByID: %s\n", err)
 		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to retrieve attendance")
 		return
 	}
@@ -56,11 +59,13 @@ func (a *AttandanceController) GetAttendanceByID(c *gin.Context) {
 func (a *AttandanceController) AddAttendanceHandler(c *gin.Context) {
 	var attendance model.Attendance
 	if err := c.ShouldBindJSON(&attendance); err != nil {
+		log.Printf("Error in AttandanceController.AddAttendanceHandler (Invalid JSON): %s\n", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	createdAttendance, err := a.attendanceUC.AddAttendance(attendance.UserID, attendance.ScheduleID)
 	if err != nil {
+		log.Printf("Error in AttandanceController.AddAttendanceHandler: %s\n", err)
 		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to create attendance")
 		return
 	}
@@ -71,6 +76,7 @@ func (a *AttandanceController) DeleteAttendanceHandler(c *gin.Context) {
 	id := c.Param("id")
 	err := a.attendanceUC.DeleteAttandace(id)
 	if err != nil {
+		log.Printf("Error in AttandanceController.DeleteAttendanceHandler: %s\n", err)
 		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to delete attendance")
 		return
 	}

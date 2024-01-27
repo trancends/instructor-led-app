@@ -31,6 +31,14 @@ func (s *Server) initRoute() {
 	log.Println("init route")
 	rg := s.engine.Group("/api/v1")
 	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
+
+	// Use a defer statement to log any panics that might occur during route initialization
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Panic during route initialization: %v\n", r)
+		}
+	}()
+
 	controller.NewUserController(s.userUC, rg, authMiddleware).Route()
 	controller.NewSchedulesController(s.scheduleUC, rg, authMiddleware).Route()
 	controller.NewQuestionsController(s.questionsUC, rg, authMiddleware).Route()
@@ -41,14 +49,14 @@ func (s *Server) initRoute() {
 func (s *Server) Run() {
 	s.initRoute()
 	if err := s.engine.Run(s.host); err != nil {
-		panic(fmt.Errorf("failed to start server %v", err))
+		log.Fatalf("Failed to start server: %v\n", err)
 	}
 }
 
 func NewServer() *Server {
 	cfg, err := config.NewConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error reading config: %v\n", err)
 	}
 
 	fmt.Println("Welcome to the Instructor Led App!")
@@ -56,17 +64,16 @@ func NewServer() *Server {
 
 	db, err := sql.Open(cfg.Driver, psqlInfo)
 	if err != nil {
-		fmt.Println(err.Error())
-		log.Fatal(err)
+		log.Fatalf("Error opening database connection: %v\n", err)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error pinging database: %v\n", err)
 	}
 	fmt.Println("Connected to Database")
 	if err != nil {
-		log.Fatal(fmt.Errorf("config error: %v", err))
+		log.Fatalf("Config error: %v\n", err)
 	}
 
 	userRepository := repository.NewUserRepository(db)

@@ -148,7 +148,7 @@ func (u *userRepository) Update(payload model.User) error {
 	currTime := time.Now().Local()
 	user.UpdatedAt = &currTime
 
-	_, err = u.db.Exec(config.UpdateUser, user.Name, user.Email, user.Password, user.Role, user.UpdatedAt, user.ID)
+	_, err = u.db.Exec(config.UpdateUser, user.Name, user.Email, user.Password, user.UpdatedAt, user.ID)
 	if err != nil {
 		log.Println("err at updating user", err)
 		return err

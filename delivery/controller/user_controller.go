@@ -10,6 +10,7 @@ import (
 
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
+	"enigmaCamp.com/instructor_led/shared/utils"
 	"enigmaCamp.com/instructor_led/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -124,12 +125,34 @@ func (u *UserController) GetUserByEmailHandler(c *gin.Context) {
 
 func (u *UserController) UpdateUserHandler(c *gin.Context) {
 	userId := c.Param("id")
+	var user model.User
 	_, err := u.userUC.GetUserByID(userId)
 	if err == sql.ErrNoRows {
 		log.Println("error at calling user usecase GetUserByID", err)
 		common.SendErrorResponse(c, http.StatusBadRequest, "user not found"+err.Error())
 		return
 	}
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		log.Println("invalid json at UpdateUserHandler")
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid json"+err.Error())
+		return
+	}
+
+	if user.Name == "" || user.Email == "" || user.Password == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "name, email, and password are required")
+		return
+	}
+
+	user.Password, _ = utils.GetHashPassword(user.Password)
+	user.ID = userId
+	err = u.userUC.UpdateUser(user)
+	if err != nil {
+		log.Println("error at calling user usecase UpdateUser", err)
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to update user"+err.Error())
+		return
+	}
+	common.SendSingleResponse(c, user, "user updated successfully")
 }
 
 func (u *UserController) DeleteUserHandler(c *gin.Context) {

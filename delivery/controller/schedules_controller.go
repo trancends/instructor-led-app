@@ -194,8 +194,8 @@ func (s *SchedulesController) UploadDocumentationHandler(c *gin.Context) {
 	}
 
 	// Define the file path to save the upload image.
-	uuid := uuid.New()
-	stringUUID := uuid.String()
+	fileUUID := uuid.New()
+	stringUUID := fileUUID.String()
 	path := fmt.Sprintf("./scheduleImages/%s", stringUUID+"-"+file.Filename)
 
 	// Save the uploaded image to the defined path

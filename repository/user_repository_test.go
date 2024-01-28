@@ -202,7 +202,7 @@ func (s *UserRepositoryTestSuite) TestListFailed() {
 	s.NotNil(err)
 }
 
-func (s *UserRepositoryTestSuite) TestUpdateFail() {
+func (s *UserRepositoryTestSuite) TestUpdate() {
 	// Mock the database query and expected result
 	s.mockSql.ExpectExec(regexp.QuoteMeta("UPDATE users SET name = $1, email = $2, password = $3, updated_at = $4 WHERE id = $5")).
 		WithArgs(expectedUserUpdate.Name, expectedUserUpdate.Email, expectedUserUpdate.Password, customTimeMatcher(expectedUserUpdate.UpdatedAt), expectedUserUpdate.ID).

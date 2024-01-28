@@ -11,6 +11,7 @@ type QuestionsUsecase interface {
 	CreateQuestionsUC(payload model.Question) (model.Question, error)
 	GetQuestion(date string) ([]*model.Schedule, error)
 	ListQuestions() ([]model.Question, error)
+	ListQuestionsByScheduleID(scheduleID string) ([]model.Question, error)
 	DeleteQuestion(id string) error
 	UpdateQuestionStatus(payload model.Question) error
 }
@@ -48,6 +49,15 @@ func (u *questionsUsecase) ListQuestions() ([]model.Question, error) {
 	questions, err := u.questionsRepository.List()
 	if err != nil {
 		log.Println("QuestionsUsecase.ListQuestions:", err.Error())
+		return nil, err
+	}
+	return questions, nil
+}
+
+func (u *questionsUsecase) ListQuestionsByScheduleID(scheduleID string) ([]model.Question, error) {
+	questions, err := u.questionsRepository.GetByScheduleID(scheduleID)
+	if err != nil {
+		log.Println("QuestionsUsecase.ListQuestionsByScheduleID:", err.Error())
 		return nil, err
 	}
 	return questions, nil

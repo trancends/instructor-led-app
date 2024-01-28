@@ -34,11 +34,50 @@ func NewSchedulesController(schedulesUC usecase.ShecdulesUseCase, rg *gin.Router
 }
 
 func (s *SchedulesController) Route() {
+	s.rg.GET("/schedules/role", s.authMiddleware.RequireToken("ADMIN", "TRAINER", "PARTICIPANT"), s.FindSchedulesByRoleHandler)
 	s.rg.GET("/schedules", s.authMiddleware.RequireToken("ADMIN", "TRAINER"), s.FindAllScheduleHandler)
 	s.rg.POST("/schedules", s.authMiddleware.RequireToken("ADMIN", "PARTICIPANT"), s.CreateScheduleHandler)
 	s.rg.GET("/schedules/:id", s.authMiddleware.RequireToken("ADMIN", "TRAINER", "PARTICIPANT"), s.FindByIDScheduleHandler)
 	s.rg.DELETE("/schedules/:id", s.authMiddleware.RequireToken("ADMIN"), s.DeleteScheduleHandler)
 	s.rg.PATCH("/schedules/upload/:id", s.UploadDocumentationHandler)
+}
+
+func (s *SchedulesController) FindSchedulesByRoleHandler(c *gin.Context) {
+	role := c.Query("role")
+	if role == "" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "role cannot be empty")
+		return
+	}
+	page, err := strconv.Atoi(c.Query("page"))
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid page")
+		return
+	}
+	size, err := strconv.Atoi(c.Query("size"))
+	if err != nil {
+		common.SendErrorResponse(c, http.StatusBadRequest, "invalid size")
+		return
+	}
+
+	if page == 0 {
+		page = 1
+	}
+
+	if size == 0 {
+		size = 10
+	}
+
+	schedules, paging, err := s.schedulesUC.FindScheduleByRole(page, size, role)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			common.SendErrorResponse(c, http.StatusBadRequest, "schedules not found")
+			return
+		}
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	common.SendPagedResponse(c, schedules, paging, "success")
 }
 
 func (s *SchedulesController) CreateScheduleHandler(c *gin.Context) {

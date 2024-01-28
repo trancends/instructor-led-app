@@ -29,7 +29,9 @@ type Server struct {
 
 func (s *Server) initRoute() {
 	log.Println("init route")
-	rg := s.engine.Group("/api/v1")
+	route := s.engine
+	route.Static("/scheduleImages", "./scheduleImages")
+	rg := route.Group("/api/v1")
 	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
 	controller.NewUserController(s.userUC, rg, authMiddleware).Route()
 	controller.NewSchedulesController(s.scheduleUC, rg, authMiddleware).Route()

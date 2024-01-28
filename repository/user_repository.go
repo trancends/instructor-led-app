@@ -13,6 +13,7 @@ import (
 )
 
 type UserRepository interface {
+	CreateUserCSV(payload []model.User) error
 	Create(payload model.User) error
 	List(page int, size int) ([]model.User, sharedmodel.Paging, error)
 	GetUserByEmail(email string) (model.User, error)
@@ -30,6 +31,28 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	return &userRepository{
 		db: db,
 	}
+}
+
+func (u *userRepository) CreateUserCSV(payload []model.User) error {
+	var err error
+	tx, err := u.db.Begin()
+	if err != nil {
+		return err
+	}
+	log.Println("insert users")
+	for _, user := range payload {
+		err = tx.QueryRow(config.InsertUser, user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
+		if err != nil {
+			tx.Rollback()
+			log.Println("err at inserting user", err)
+			return err
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *userRepository) Create(payload model.User) error {
@@ -148,7 +171,7 @@ func (u *userRepository) Update(payload model.User) error {
 	currTime := time.Now().Local()
 	user.UpdatedAt = &currTime
 
-	_, err = u.db.Exec(config.UpdateUser, user.Name, user.Email, user.Password, user.Role, user.UpdatedAt, user.ID)
+	_, err = u.db.Exec(config.UpdateUser, user.Name, user.Email, user.Password, user.UpdatedAt, user.ID)
 	if err != nil {
 		log.Println("err at updating user", err)
 		return err

@@ -9,6 +9,7 @@ import (
 )
 
 type UserUsecase interface {
+	CreateUserCSV(payload []model.User) error
 	CreateUser(payload model.User) error
 	ListAllUsers(page int, size int) ([]model.User, sharedmodel.Paging, error)
 	GetUserByEmail(email string) (model.User, error)
@@ -26,6 +27,15 @@ func NewUserUsecase(userRepository repository.UserRepository) UserUsecase {
 	return &userUsecase{
 		userRepository: userRepository,
 	}
+}
+
+func (u *userUsecase) CreateUserCSV(payload []model.User) error {
+	log.Println("calling user repo Create")
+	err := u.userRepository.CreateUserCSV(payload)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (u *userUsecase) CreateUser(payload model.User) error {

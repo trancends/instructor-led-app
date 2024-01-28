@@ -44,3 +44,8 @@ func (m *UserUsecaseMock) UpdateUser(payload model.User) error {
 	args := m.Called(payload)
 	return args.Error(0)
 }
+
+func (m *UserUsecaseMock) DeleteUser(id string) error {
+	args := m.Called(id)
+	return args.Error(0)
+}

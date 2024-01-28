@@ -216,6 +216,17 @@ func (s *UserRepositoryTestSuite) TestUpdate() {
 	s.Nil(err)
 }
 
+func (s *UserRepositoryTestSuite) TestUpdateFailed() {
+	// Mock the database query and expected result
+	s.mockSql.ExpectExec(regexp.QuoteMeta("UPDATE users SET name = $1, email = $2, password = $3, updated_at = $4 WHERE id = $5")).
+		WithArgs(expectedUserUpdate.Name, expectedUserUpdate.Email, expectedUserUpdate.Password, customTimeMatcher(expectedUserUpdate.UpdatedAt), expectedUserUpdate.ID).
+		WillReturnError(errors.New("sql: no rows in result set"))
+
+	// Call the Update method
+	err := s.repo.Update(expectedUserUpdate)
+	s.Error(err)
+}
+
 func customTimeMatcher(expected *time.Time) interface{} {
 	return sqlmock.AnyArg()
 }

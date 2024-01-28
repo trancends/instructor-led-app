@@ -37,6 +37,14 @@ var (
 		Role:     "PARTICIPANT",
 	}
 
+	expectedUserUpdate = model.User{
+		ID:        "1",
+		Name:      "UpdatedName",
+		Email:     "updatedemail@example.com",
+		Password:  "updatedpassword",
+		UpdatedAt: &currentTime,
+	}
+
 	expectedUsers = []model.User{
 		{ID: "1", Name: "User1", Email: "user1@example.com", Role: "PARTICIPANT"},
 		{ID: "2", Name: "User2", Email: "user2@example.com", Role: "PARTICIPANT"},
@@ -192,6 +200,24 @@ func (s *UserRepositoryTestSuite) TestListFailed() {
 	_, _, err := s.repo.List(expectedPaging.Page, expectedPaging.RowsPerPage)
 	s.Error(err)
 	s.NotNil(err)
+}
+
+func (s *UserRepositoryTestSuite) TestUpdateFail() {
+	// Mock the database query and expected result
+	s.mockSql.ExpectExec(regexp.QuoteMeta("UPDATE users SET name = $1, email = $2, password = $3, updated_at = $4 WHERE id = $5")).
+		WithArgs(expectedUserUpdate.Name, expectedUserUpdate.Email, expectedUserUpdate.Password, customTimeMatcher(expectedUserUpdate.UpdatedAt), expectedUserUpdate.ID).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	// Call the Update method
+	err := s.repo.Update(expectedUserUpdate)
+
+	// Verify the result
+	s.NoError(err)
+	s.Nil(err)
+}
+
+func customTimeMatcher(expected *time.Time) interface{} {
+	return sqlmock.AnyArg()
 }
 
 func TestUserRepositoryTestSuite(t *testing.T) {

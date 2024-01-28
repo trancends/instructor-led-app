@@ -34,6 +34,7 @@ func (q *QuestionsController) Route() {
 	q.rg.POST("/questions", q.authMiddleware.RequireToken("ADMIN", "TRAINER", "PARTICIPANT"), q.CreateQuestionsHandler)
 	q.rg.PATCH("/questions", q.authMiddleware.RequireToken("ADMIN", "TRAINER"), q.PatchQuestionsHandler)
 	q.rg.DELETE("/questions/:id", q.authMiddleware.RequireToken("ADMIN"), q.DeleteQuestionsHandler)
+	q.rg.GET("/questions/:scheduleID", q.authMiddleware.RequireToken("ADMIN", "TRAINER", "PARTICIPANT"), q.ListQuestionByScheduleID)
 }
 
 func (q *QuestionsController) CreateQuestionsHandler(c *gin.Context) {
@@ -82,6 +83,22 @@ func (q *QuestionsController) ListQuestionsHandler(c *gin.Context) {
 	questions, err := q.questionsUC.ListQuestions()
 	if err != nil {
 		log.Printf("Error in QuestionsController.ListQuestionsHandler: %s\n", err)
+		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to list questions"+err.Error())
+		return
+	}
+	common.SendSingleResponse(c, questions, "questions retrieved successfully")
+}
+
+func (q *QuestionsController) ListQuestionByScheduleID(c *gin.Context) {
+	scheduleID := c.Param("scheduleID")
+	questions, err := q.questionsUC.ListQuestionsByScheduleID(scheduleID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("Error in QuestionsController.ListQuestionByScheduleID: %s\n", err)
+			common.SendErrorResponse(c, http.StatusNotFound, "questions not found")
+			return
+		}
+		log.Printf("Error in QuestionsController.ListQuestionByScheduleID: %s\n", err)
 		common.SendErrorResponse(c, http.StatusInternalServerError, "failed to list questions"+err.Error())
 		return
 	}

@@ -13,6 +13,7 @@ type QuestionsRepository interface {
 	CreateQuestions(payload model.Question) (model.Question, error)
 	Get(date string) ([]*model.Schedule, error)
 	GetByID(id string) (model.Question, error)
+	GetByScheduleID(scheduleID string) ([]model.Question, error)
 	List() ([]model.Question, error)
 	Delete(id string) error
 	UpdateStatus(payload model.Question) error
@@ -147,6 +148,29 @@ func (q *questionsRepository) GetByID(id string) (model.Question, error) {
 		return question, err
 	}
 	return question, nil
+}
+
+// GetByScheduleID
+func (q *questionsRepository) GetByScheduleID(scheduleID string) ([]model.Question, error) {
+	var questions []model.Question
+	rows, err := q.db.Query(config.SelectQuestionsByScheduleID, scheduleID)
+	if err != nil {
+		log.Println("questionsRepository.GetByScheduleID:", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var question model.Question
+		err := rows.Scan(&question.ID, &question.ScheduleID, &question.Description, &question.Status)
+		if err != nil {
+			log.Println("questionsRepository.GetByScheduleID:", err.Error())
+			return nil, err
+		}
+		questions = append(questions, question)
+	}
+
+	return questions, nil
 }
 
 // Delete implements QuestionsRepository.

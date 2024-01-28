@@ -28,7 +28,9 @@ type Server struct {
 
 func (s *Server) initRoute() {
 	log.Println("init route")
-	rg := s.engine.Group("/api/v1")
+	route := s.engine
+	route.Static("/scheduleImages", "./scheduleImages")
+	rg := route.Group("/api/v1")
 	controller.NewUserController(s.userUC, rg).Route()
 	controller.NewSchedulesController(s.scheduleUC, rg).Route()
 	controller.NewQuestionsController(s.questionsUC, rg).Route()

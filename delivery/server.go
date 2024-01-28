@@ -7,6 +7,7 @@ import (
 
 	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/delivery/controller"
+	"enigmaCamp.com/instructor_led/delivery/middleware"
 	repository "enigmaCamp.com/instructor_led/repository"
 	"enigmaCamp.com/instructor_led/shared/service"
 	"enigmaCamp.com/instructor_led/usecase"
@@ -31,24 +32,25 @@ func (s *Server) initRoute() {
 	route := s.engine
 	route.Static("/scheduleImages", "./scheduleImages")
 	rg := route.Group("/api/v1")
-	controller.NewUserController(s.userUC, rg).Route()
-	controller.NewSchedulesController(s.scheduleUC, rg).Route()
-	controller.NewQuestionsController(s.questionsUC, rg).Route()
-	controller.NewAttandanceController(rg, s.attendanceUC).Route()
+	authMiddleware := middleware.NewAuthMiddleware(s.jwtService)
+	controller.NewUserController(s.userUC, rg, authMiddleware).Route()
+	controller.NewSchedulesController(s.scheduleUC, rg, authMiddleware).Route()
+	controller.NewQuestionsController(s.questionsUC, rg, authMiddleware).Route()
+	controller.NewAttandanceController(rg, s.attendanceUC, authMiddleware).Route()
 	controller.NewAuthController(s.authUC, rg).Route()
 }
 
 func (s *Server) Run() {
 	s.initRoute()
 	if err := s.engine.Run(s.host); err != nil {
-		panic(fmt.Errorf("failed to start server %v", err))
+		log.Fatalf("Failed to start server: %v\n", err)
 	}
 }
 
 func NewServer() *Server {
 	cfg, err := config.NewConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error reading config: %v\n", err)
 	}
 
 	fmt.Println("Welcome to the Instructor Led App!")
@@ -56,17 +58,16 @@ func NewServer() *Server {
 
 	db, err := sql.Open(cfg.Driver, psqlInfo)
 	if err != nil {
-		fmt.Println(err.Error())
-		log.Fatal(err)
+		log.Fatalf("Error opening database connection: %v\n", err)
 	}
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error pinging database: %v\n", err)
 	}
 	fmt.Println("Connected to Database")
 	if err != nil {
-		log.Fatal(fmt.Errorf("config error: %v", err))
+		log.Fatalf("Config error: %v\n", err)
 	}
 
 	userRepository := repository.NewUserRepository(db)
@@ -78,8 +79,7 @@ func NewServer() *Server {
 	attendanceRepository := repository.NewAttendanceRepository(db)
 	attendanceUseCase := usecase.NewAttendanceUsecase(attendanceRepository)
 	jwtService := service.NewJwtService(cfg.TokenConfig)
-	authUseCase := usecase.NewAuthUseCase(userUseCase, jwtService)
-
+	authUC := usecase.NewAuthUseCase(userUseCase, jwtService)
 	engine := gin.Default()
 	host := fmt.Sprintf(":%s", cfg.ApiPort)
 
@@ -88,7 +88,8 @@ func NewServer() *Server {
 		userUC:       userUseCase,
 		questionsUC:  questionsUseCase,
 		attendanceUC: attendanceUseCase,
-		authUC:       authUseCase,
+		authUC:       authUC,
+		jwtService:   jwtService,
 		engine:       engine,
 		host:         host,
 	}

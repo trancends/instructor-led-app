@@ -14,7 +14,7 @@ import (
 
 type JwtService interface {
 	GenerateToken(user model.User) (dto.AuthResponseDTO, error)
-	ParseToken(tokenHeadr string) (jwt.MapClaims, error)
+	ParseToken(tokenHeader string) (jwt.MapClaims, error)
 	GetKey() []byte
 }
 
@@ -27,12 +27,12 @@ func (j *jwtService) ParseToken(tokenHeader string) (jwt.MapClaims, error) {
 		return j.cfg.JwtSignatureKey, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("oops, failed to verify token")
+		return nil, fmt.Errorf("failed to verify token: %w", err)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, fmt.Errorf("oops, failed to claim token")
+		return nil, fmt.Errorf("failed to extract claims from token")
 	}
 	return claims, nil
 }
@@ -53,11 +53,12 @@ func (j *jwtService) GenerateToken(user model.User) (dto.AuthResponseDTO, error)
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(j.cfg.JwtSignatureKey)
-	log.Println("tokenString:")
-	log.Println(tokenString)
 	if err != nil {
-		return dto.AuthResponseDTO{}, err
+		return dto.AuthResponseDTO{}, fmt.Errorf("failed to sign token: %w", err)
 	}
+
+	log.Printf("Generated token: %s", tokenString)
+
 	return dto.AuthResponseDTO{
 		Token: tokenString,
 	}, nil

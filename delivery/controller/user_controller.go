@@ -10,6 +10,7 @@ import (
 	"net/mail"
 	"strconv"
 
+	"enigmaCamp.com/instructor_led/delivery/middleware"
 	"enigmaCamp.com/instructor_led/model"
 	"enigmaCamp.com/instructor_led/shared/common"
 	"enigmaCamp.com/instructor_led/shared/utils"
@@ -18,14 +19,16 @@ import (
 )
 
 type UserController struct {
-	userUC usecase.UserUsecase
-	rg     *gin.RouterGroup
+	userUC         usecase.UserUsecase
+	rg             *gin.RouterGroup
+	authMiddleware middleware.AuthMiddleware
 }
 
-func NewUserController(userUC usecase.UserUsecase, rg *gin.RouterGroup) *UserController {
+func NewUserController(userUC usecase.UserUsecase, rg *gin.RouterGroup, authMiddleware middleware.AuthMiddleware) *UserController {
 	return &UserController{
-		userUC: userUC,
-		rg:     rg,
+		userUC:         userUC,
+		rg:             rg,
+		authMiddleware: authMiddleware,
 	}
 }
 
@@ -35,7 +38,7 @@ func (u *UserController) Route() {
 	u.rg.GET("/users", u.GetAllUserHandler)
 	u.rg.GET("/users/:email", u.GetUserByEmailHandler)
 	u.rg.PUT("/users/:id", u.UpdateUserHandler)
-	u.rg.DELETE("/users/:id", u.DeleteUserHandler)
+	u.rg.DELETE("/users/:id", u.authMiddleware.RequireToken("ADMIN"), u.DeleteUserHandler)
 }
 
 func (u *UserController) CreateUserHanlder(c *gin.Context) {

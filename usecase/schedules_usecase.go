@@ -16,6 +16,7 @@ type ShecdulesUseCase interface {
 	CreateScheduledUC(payload model.Schedule) (model.Schedule, error)
 	FindByIDUC(id string) (model.Schedule, error)
 	DeletedScheduleIDUC(id string) error
+	UpdateScheduleDocumentation(id string, pictureURL string) error
 }
 
 type schedulesUseCase struct {
@@ -63,6 +64,16 @@ func (s *schedulesUseCase) DeletedScheduleIDUC(id string) error {
 			return fmt.Errorf("schedule with ID %s not found", id)
 		}
 		log.Println("schedulesUseCase.DeletedScheduleIDUC:", err.Error())
+		return err
+	}
+	return nil
+}
+
+// UpdateScheduleDocumentation implements ShecdulesUseCase.
+func (s *schedulesUseCase) UpdateScheduleDocumentation(id string, pictureURL string) error {
+	err := s.scheduleRepository.UpdateDocumentation(id, pictureURL)
+	if err != nil {
+		log.Println("schedulesUseCase.UpdateScheduleDocumentation:", err.Error())
 		return err
 	}
 	return nil

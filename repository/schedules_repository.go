@@ -16,6 +16,7 @@ type ScheduleRepository interface {
 	CreateScheduled(payload model.Schedule) (model.Schedule, error)
 	GetByID(id string) (model.Schedule, error)
 	Delete(id string) error
+	UpdateDocumentation(id string, pictureURL string) error
 }
 
 type scheduleRepository struct {
@@ -42,7 +43,6 @@ func (s *scheduleRepository) CreateScheduled(payload model.Schedule) (model.Sche
 		&schedule.EndTime,
 		&schedule.Documentation,
 	)
-
 	if err != nil {
 		log.Println("scheduleRepository.CreateScheduled:", err.Error())
 		return schedule, err
@@ -128,6 +128,17 @@ func (s *scheduleRepository) Delete(id string) error {
 	if rowsAffected == 0 {
 		return sql.ErrNoRows
 	}
+	return nil
+}
+
+func (s *scheduleRepository) UpdateDocumentation(id string, pictureURL string) error {
+	currentTime := time.Now().Local()
+	_, err := s.db.Exec(config.UpdateScheduleDoc, pictureURL, currentTime, id)
+	if err != nil {
+		log.Println("scheduleRepository.UpdateDocumentation:", err.Error())
+		return err
+	}
+
 	return nil
 }
 

@@ -9,7 +9,6 @@ import (
 	"enigmaCamp.com/instructor_led/config"
 	"enigmaCamp.com/instructor_led/model"
 	sharedmodel "enigmaCamp.com/instructor_led/shared/shared_model"
-	"enigmaCamp.com/instructor_led/shared/utils"
 )
 
 type UserRepository interface {
@@ -58,7 +57,6 @@ func (u *userRepository) CreateUserCSV(payload []model.User) error {
 func (u *userRepository) Create(payload model.User) error {
 	var err error
 	user := payload
-	user.Password, _ = utils.GetHashPassword(user.Password)
 
 	err = u.db.QueryRow(config.InsertUser, user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
 	if err != nil {

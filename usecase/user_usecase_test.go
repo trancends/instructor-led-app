@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	repo_mock "enigmaCamp.com/instructor_led/mock/repository_mock"
+	"enigmaCamp.com/instructor_led/mock/repository_mock"
 	"enigmaCamp.com/instructor_led/model"
 	sharedmodel "enigmaCamp.com/instructor_led/shared/shared_model"
 	"github.com/stretchr/testify/suite"
@@ -52,7 +52,7 @@ var (
 
 type UserUseCaseTestSuite struct {
 	suite.Suite
-	userRepoMock *repo_mock.UserRepositoryMock
+	userRepoMock *repository_mock.UserRepositoryMock
 	userUseCase  UserUsecase
 }
 
@@ -184,7 +184,7 @@ func (s *UserUseCaseTestSuite) TestDeleteUser_Error() {
 }
 
 func (s *UserUseCaseTestSuite) SetupTest() {
-	s.userRepoMock = new(repo_mock.UserRepositoryMock)
+	s.userRepoMock = new(repository_mock.UserRepositoryMock)
 	s.userUseCase = NewUserUsecase(s.userRepoMock)
 }
 

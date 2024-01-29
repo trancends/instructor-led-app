@@ -10,6 +10,11 @@ type QuestionUscaseMock struct {
 }
 
 // CreateQuestionsUC implements usecase.QuestionsUsecase.
+func (*QuestionUscaseMock) CreateQuestionsUC(payload model.Question) (model.Question, error) {
+	panic("unimplemented")
+}
+
+// CreateQuestionsUC implements usecase.QuestionsUsecase.
 
 func (q *QuestionUscaseMock) CreateQuestion(payload model.Question) (model.Question, error) {
 	args := q.Called(payload)

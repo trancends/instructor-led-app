@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	repo_mock "enigmaCamp.com/instructor_led/mock/repository_mock"
+	"enigmaCamp.com/instructor_led/mock/repository_mock"
 	"enigmaCamp.com/instructor_led/model"
 	sharedmodel "enigmaCamp.com/instructor_led/shared/shared_model"
 	"github.com/stretchr/testify/suite"
@@ -43,12 +43,12 @@ var mockPaging = sharedmodel.Paging{
 
 type ScheduleUseCaseTestSuite struct {
 	suite.Suite
-	srm *repo_mock.ScheduleRepositoryMock
+	srm *repository_mock.ScheduleRepositoryMock
 	suc ShecdulesUseCase
 }
 
 func (s *ScheduleUseCaseTestSuite) SetupTest() {
-	s.srm = new(repo_mock.ScheduleRepositoryMock)
+	s.srm = new(repository_mock.ScheduleRepositoryMock)
 	s.suc = NewSchedulesUseCase(s.srm)
 }
 
@@ -110,6 +110,7 @@ func (s *ScheduleUseCaseTestSuite) TestFindByIDUC_Success() {
 	s.Nil(err)
 	s.Equal(expectedSchedule, actual)
 }
+
 func (s *ScheduleUseCaseTestSuite) TestFindByIDUC_Fail() {
 	s.srm.On("GetByID", expectedSchedule.ID).Return(model.Schedule{}, errors.New("some error"))
 	_, err := s.suc.FindByIDUC(expectedSchedule.ID)

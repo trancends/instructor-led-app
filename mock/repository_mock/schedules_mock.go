@@ -1,4 +1,4 @@
-package repo_mock
+package repository_mock
 
 import (
 	"enigmaCamp.com/instructor_led/model"
@@ -14,6 +14,7 @@ func (m *ScheduleRepositoryMock) ListScheduleByRole(page int, size int, role str
 	args := m.Called(page, size, role)
 	return args.Get(0).([]model.Schedule), args.Get(1).(sharedmodel.Paging), args.Error(2)
 }
+
 func (m *ScheduleRepositoryMock) CreateScheduled(payload model.Schedule) (model.Schedule, error) {
 	args := m.Called(payload)
 	return args.Get(0).(model.Schedule), args.Error(1)
@@ -33,6 +34,7 @@ func (m *ScheduleRepositoryMock) Delete(id string) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
+
 func (m *ScheduleRepositoryMock) UpdateDocumentation(id string, pictureURL string) error {
 	args := m.Called(id, pictureURL)
 	return args.Error(0)

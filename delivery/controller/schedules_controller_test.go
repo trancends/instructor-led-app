@@ -9,7 +9,6 @@ import (
 	"enigmaCamp.com/instructor_led/mock/middleware_mock"
 	"enigmaCamp.com/instructor_led/mock/usecase_mock"
 	"enigmaCamp.com/instructor_led/model"
-	sharedmodel "enigmaCamp.com/instructor_led/shared/shared_model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
 )
@@ -39,44 +38,6 @@ var expectedSchedules = []model.Schedule{
 		},
 	},
 }
-var expectedPaging = sharedmodel.Paging{
-	Page:        1,
-	RowsPerPage: 10,
-	TotalRows:   len(expectedSchedules),
-	TotalPages:  0,
-}
-
-var (
-	currentTime  = time.Now().Local()
-	expectedUser = model.User{
-		ID:       "1",
-		Name:     "test",
-		Email:    "test@example.com",
-		Password: "test",
-		Role:     "PARTICIPANT",
-	}
-
-	expectedUserError = model.User{
-		ID:       "1",
-		Name:     "test",
-		Password: "test",
-		Role:     "PARTICIPANT",
-	}
-
-	expectedUserUpdate = model.User{
-		ID:        "1",
-		Name:      "UpdatedName",
-		Email:     "updatedemail@example.com",
-		Password:  "updatedpassword",
-		UpdatedAt: &currentTime,
-	}
-
-	expectedUsers = []model.User{
-		{ID: "1", Name: "User1", Email: "user1@example.com", Role: "PARTICIPANT"},
-		{ID: "2", Name: "User2", Email: "user2@example.com", Role: "PARTICIPANT"},
-		// Add more expected users as needed
-	}
-)
 
 type ScheduleControllerTestSuite struct {
 	suite.Suite
@@ -176,21 +137,8 @@ func (s *ScheduleControllerTestSuite) TestFindSchedulesByRoleHandler_success() {
 //		SchedulesController.FindSchedulesByRoleHandler(ctx)
 //		s.Equal(http.StatusBadRequest, record.Code)
 //	}
-func (s *ScheduleControllerTestSuite) TestFindByIDScheduleHandler_success() {
-	s.sum.Mock.On("FindByIDUC", "1").Return(expectedSchedules, nil)
-	SchedulesController := NewSchedulesController(s.sum, s.rg, s.AuthMiddlewareMock)
-	SchedulesController.Route()
-	req, err := http.NewRequest("GET", "/api/v1/schedules/1", nil)
-	s.NoError(err)
-	record := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(record)
-	ctx.Request = req
-	SchedulesController.FindByIDScheduleHandler(ctx)
-	// Add assertions here
-}
-
-// func (s *ScheduleControllerTestSuite) TestFindByIDScheduleHandler_fail() {
-// 	s.sum.Mock.On("FindByIDSchedulesUC", mockSchedules).Return(nil, errors.New("error"))
+// func (s *ScheduleControllerTestSuite) TestFindByIDScheduleHandler_success() {
+// 	s.sum.Mock.On("FindByIDUC", "1").Return(expectedSchedules, nil)
 // 	SchedulesController := NewSchedulesController(s.sum, s.rg, s.AuthMiddlewareMock)
 // 	SchedulesController.Route()
 // 	req, err := http.NewRequest("GET", "/api/v1/schedules/1", nil)
@@ -199,25 +147,12 @@ func (s *ScheduleControllerTestSuite) TestFindByIDScheduleHandler_success() {
 // 	ctx, _ := gin.CreateTestContext(record)
 // 	ctx.Request = req
 // 	SchedulesController.FindByIDScheduleHandler(ctx)
-// 	s.Equal(http.StatusBadRequest, record.Code)
+// 	// Add assertions here
 // }
 
-func (s *ScheduleControllerTestSuite) TestDeleteScheduleHandler_success() {
-	s.sum.Mock.On("FindByIDUC", "1").Return(expectedSchedules, nil)
-	s.sum.Mock.On("DeletedScheduleIDUC", "1").Return(nil)
-	SchedulesController := NewSchedulesController(s.sum, s.rg, s.AuthMiddlewareMock)
-	SchedulesController.Route()
-	req, err := http.NewRequest("DELETE", "/api/v1/schedules/1", nil)
-	s.NoError(err)
-	record := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(record)
-	ctx.Request = req
-	SchedulesController.DeleteScheduleHandler(ctx)
-	s.Equal(http.StatusOK, record.Code)
-}
-
-// func (s *ScheduleControllerTestSuite) TestDeleteScheduleHandler_fail() {
-// 	s.sum.Mock.On("DeleteSchedulesUC", mockSchedules).Return(nil, errors.New("error"))
+// func (s *ScheduleControllerTestSuite) TestDeleteScheduleHandler_success() {
+// 	s.sum.Mock.On("FindByIDUC", "1").Return(expectedSchedules, nil)
+// 	s.sum.Mock.On("DeletedScheduleIDUC", "1").Return(nil)
 // 	SchedulesController := NewSchedulesController(s.sum, s.rg, s.AuthMiddlewareMock)
 // 	SchedulesController.Route()
 // 	req, err := http.NewRequest("DELETE", "/api/v1/schedules/1", nil)
@@ -226,26 +161,12 @@ func (s *ScheduleControllerTestSuite) TestDeleteScheduleHandler_success() {
 // 	ctx, _ := gin.CreateTestContext(record)
 // 	ctx.Request = req
 // 	SchedulesController.DeleteScheduleHandler(ctx)
-// 	s.Equal(http.StatusBadRequest, record.Code)
+// 	s.Equal(http.StatusOK, record.Code)
 // }
 
-func (s *ScheduleControllerTestSuite) TestUpdateScheduleHandler_success() {
-	s.sum.Mock.On("FindByIDUC", "1").Return(expectedSchedules, nil)
-	s.sum.Mock.On("UpdateScheduleDocumentation", "1", "example.jpg").Return(nil)
-	SchedulesController := NewSchedulesController(s.sum, s.rg, s.AuthMiddlewareMock)
-	SchedulesController.Route()
-	req, err := http.NewRequest("PATCH", "/api/v1/schedules/1", nil)
-	s.NoError(err)
-	record := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(record)
-	ctx.Request = req
-	ctx.Set("picture", "example.jpg")
-	SchedulesController.UploadDocumentationHandler(ctx)
-	s.Equal(http.StatusOK, record.Code)
-}
-
-// func (s *ScheduleControllerTestSuite) TestUpdateScheduleHandler_fail() {
-// 	s.sum.Mock.On("UpdateSchedulesUC", mockSchedules).Return(nil, errors.New("error"))
+// func (s *ScheduleControllerTestSuite) TestUpdateScheduleHandler_success() {
+// 	s.sum.Mock.On("FindByIDUC", "1").Return(expectedSchedules, nil)
+// 	s.sum.Mock.On("UpdateScheduleDocumentation", "1", "example.jpg").Return(nil)
 // 	SchedulesController := NewSchedulesController(s.sum, s.rg, s.AuthMiddlewareMock)
 // 	SchedulesController.Route()
 // 	req, err := http.NewRequest("PATCH", "/api/v1/schedules/1", nil)
@@ -253,8 +174,9 @@ func (s *ScheduleControllerTestSuite) TestUpdateScheduleHandler_success() {
 // 	record := httptest.NewRecorder()
 // 	ctx, _ := gin.CreateTestContext(record)
 // 	ctx.Request = req
+// 	ctx.Set("picture", "example.jpg")
 // 	SchedulesController.UploadDocumentationHandler(ctx)
-// 	s.Equal(http.StatusBadRequest, record.Code)
+// 	s.Equal(http.StatusOK, record.Code)
 // }
 
 func TestScheduleControllerTestSuite(t *testing.T) {

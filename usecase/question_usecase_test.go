@@ -21,21 +21,6 @@ var expectedQuestions = model.Question{
 	DeletedAt:   nil,
 }
 
-var expectedSchedule = []model.Schedule{
-	{
-		ID:            "1",
-		UserID:        "1",
-		Date:          "2022-01-01",
-		StartTime:     "11:00",
-		EndTime:       "12:00",
-		Documentation: "test",
-		CreatedAt:     time.Now(),
-		UpdatedAt:     nil,
-		DeletedAt:     nil,
-		Questions:     []model.Question{},
-	},
-}
-
 var expectedSchedulepointer = []*model.Schedule{
 	{
 		ID:            "1",

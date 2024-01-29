@@ -103,6 +103,74 @@ func (s *UserControllerTestSuite) TestGetAllUserHandler() {
 	s.Equal(http.StatusOK, record.Code)
 }
 
+func (s *UserControllerTestSuite) TestGetUserByEmailHandler() {
+	s.UserUsecaseMock.On("GetUserByEmail", expectedUser.Email).Return(expectedUser, nil)
+
+	userController := NewUserController(s.UserUsecaseMock, s.rg, s.AuthMiddlewareMock)
+	userController.Route()
+
+	req, err := http.NewRequest("GET", "/api/v1/users/test@example.com", nil)
+	s.NoError(err)
+
+	record := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(record)
+	ctx.Request = req
+	ctx.Set("user", expectedUser)
+
+	s.Equal(http.StatusOK, record.Code)
+}
+
+func (s *UserControllerTestSuite) TestUpdateUserHandler() {
+	s.UserUsecaseMock.On("UpdateUser", expectedUserUpdate).Return(expectedUserUpdate, nil)
+
+	userController := NewUserController(s.UserUsecaseMock, s.rg, s.AuthMiddlewareMock)
+	userController.Route()
+
+	req, err := http.NewRequest("PUT", "/api/v1/users/1", nil)
+	s.NoError(err)
+
+	record := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(record)
+	ctx.Request = req
+	ctx.Set("user", expectedUserUpdate)
+
+	s.Equal(http.StatusOK, record.Code)
+}
+
+func (s *UserControllerTestSuite) TestDeleteUserHandler() {
+	s.UserUsecaseMock.On("DeleteUser", expectedUser.ID).Return(nil)
+
+	userController := NewUserController(s.UserUsecaseMock, s.rg, s.AuthMiddlewareMock)
+	userController.Route()
+
+	req, err := http.NewRequest("DELETE", "/api/v1/users/1", nil)
+	s.NoError(err)
+
+	record := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(record)
+	ctx.Request = req
+	ctx.Set("user", expectedUser)
+
+	s.Equal(http.StatusOK, record.Code)
+}
+
+func (s *UserControllerTestSuite) TestCreateUserCSVHandler() {
+	s.UserUsecaseMock.On("CreateUserCSV", expectedUsers).Return(nil)
+
+	userController := NewUserController(s.UserUsecaseMock, s.rg, s.AuthMiddlewareMock)
+	userController.Route()
+
+	req, err := http.NewRequest("POST", "/api/v1/users/csv", nil)
+	s.NoError(err)
+
+	record := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(record)
+	ctx.Request = req
+	ctx.Set("users", expectedUsers)
+
+	s.Equal(http.StatusOK, record.Code)
+}
+
 func TestUserControllerTestSuite(t *testing.T) {
 	suite.Run(t, new(UserControllerTestSuite))
 }

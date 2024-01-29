@@ -9,6 +9,8 @@ type QuestionUscaseMock struct {
 	mock.Mock
 }
 
+// CreateQuestionsUC implements usecase.QuestionsUsecase.
+
 func (q *QuestionUscaseMock) CreateQuestion(payload model.Question) (model.Question, error) {
 	args := q.Called(payload)
 	return args.Get(0).(model.Question), args.Error(1)

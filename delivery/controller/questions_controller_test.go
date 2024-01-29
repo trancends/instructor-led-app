@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"time"
 
 	"enigmaCamp.com/instructor_led/mock/middleware_mock"
@@ -14,7 +16,7 @@ import (
 type QuestionsControllerSuite struct {
 	suite.Suite
 	rg                   *gin.Engine
-	QuestionsUsecaseMock *usecase_mock.QuestionUscaseMock
+	QuestionsUsecaseMock *usecase_mock.QuestionUscaseMock // Fix the typo here
 	AuthMiddlewareMock   *middleware_mock.AuthMiddlewareMock
 }
 
@@ -81,11 +83,25 @@ var (
 )
 
 func (s *QuestionsControllerSuite) SetupTest() {
-	s.QuestionsUsecaseMock = new(usecase_mock.QuestionUscaseMock)
+	s.QuestionsUsecaseMock = new(usecase_mock.QuestionUscaseMock) // Fix the typo here
 	s.AuthMiddlewareMock = new(middleware_mock.AuthMiddlewareMock)
-	s.rg = gin.Default()
 	gin.SetMode(gin.TestMode)
-	rg := s.rg.Group("/api/v1") // Fix the variable name
+	engine := gin.Default()
+	rg := engine.Group("/api/v1")
 	rg.Use(s.AuthMiddlewareMock.RequireToken("ADMIN"))
-	s.rg = rg
+	s.rg = engine
+}
+
+func (s *QuestionsControllerSuite) TestGetQuestions() {
+	s.QuestionsUsecaseMock.On("List", expectedQuestions).Return(expectedQuestions, nil)
+	questionController := NewQuestionsController(s.QuestionsUsecaseMock, s.rg, s.AuthMiddleware)
+	questionController.Route()
+	req, err := http.NewRequest("GET", "/api/v1/questions", nil)
+	s.NoError(err)
+	record := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(record)
+	ctx.Request = req
+	ctx.Set("questions", expectedQuestions[0].ID)
+	s.rg.ServeHTTP(record, req)
+	s.Equal(http.StatusOK, record.Code)
 }

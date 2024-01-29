@@ -26,7 +26,7 @@ type questionsRepository struct {
 // CreateQuestions implements QuestionsRepository.
 func (q *questionsRepository) CreateQuestions(payload model.Question) (model.Question, error) {
 	var questions model.Question
-	rows, err := q.db.Query(config.InsertQuestions, payload.ScheduleID, payload.Description)
+	rows, err := q.db.Query(config.InsertQuestions, payload.UserID, payload.ScheduleID, payload.Description)
 	if err != nil {
 		log.Println("questionsRepository.Query:", err.Error())
 		return questions, err

@@ -7,6 +7,7 @@ import (
 
 	"enigmaCamp.com/instructor_led/mock/repository_mock"
 	"enigmaCamp.com/instructor_led/model"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -36,6 +37,13 @@ var (
 		CreatedAt:  nil,
 		UpdatedAt:  nil,
 		DeletedAt:  nil,
+	}
+	newUUID                  = uuid.New()
+	expectedAttendanceDelete = model.Attendance{
+		ID:         newUUID.String(),
+		UserID:     "1",
+		ScheduleID: "1",
+		DeletedAt:  &currTime,
 	}
 )
 
@@ -99,6 +107,22 @@ func (s *AttendanceUsecaseTestSuite) TestListAttendances_Error() {
 	s.attendanceRepoMock.On("List").Return([]model.Attendance{}, errors.New("err"))
 
 	_, err := s.attendanceUsecase.ListAttendances()
+
+	s.Error(err)
+}
+
+func (s *AttendanceUsecaseTestSuite) TestDeleteAttandace() {
+	s.attendanceRepoMock.On("DeleteAttendance", expectedAttendanceDelete.ID).Return(nil)
+
+	err := s.attendanceUsecase.DeleteAttandace(expectedAttendanceDelete.ID)
+
+	s.Nil(err)
+}
+
+func (s *AttendanceUsecaseTestSuite) TestDeleteAttandace_Error() {
+	s.attendanceRepoMock.On("DeleteAttendance", expectedAttendanceDelete.ID).Return(errors.New("err"))
+
+	err := s.attendanceUsecase.DeleteAttandace(expectedAttendanceDelete.ID)
 
 	s.Error(err)
 }

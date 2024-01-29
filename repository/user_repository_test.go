@@ -227,6 +227,18 @@ func (s *UserRepositoryTestSuite) TestUpdateFailed() {
 	s.Error(err)
 }
 
+func (s *UserRepositoryTestSuite) TestDelete() {
+	// Mock the database query and expected result
+	s.mockSql.ExpectExec(regexp.QuoteMeta("UPDATE users SET deleted_at = $1 WHERE id = $2")).
+		WithArgs(customTimeMatcher(expectedUser.DeletedAt), expectedUser.ID).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	// Call the Delete method
+	err := s.repo.Delete(expectedUser.ID)
+	s.NoError(err)
+	s.Nil(err)
+}
+
 func customTimeMatcher(expected *time.Time) interface{} {
 	return sqlmock.AnyArg()
 }

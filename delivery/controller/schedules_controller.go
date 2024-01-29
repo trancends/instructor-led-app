@@ -92,6 +92,11 @@ func (s *SchedulesController) CreateScheduleHandler(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, "payload cannot be empty")
 		return
 	}
+	if s.schedulesUC == nil {
+		log.Println("SchedulesController.CreateScheduleHandler: schedulesUC is nil")
+		common.SendErrorResponse(c, http.StatusInternalServerError, "schedulesUC is nil")
+		return
+	}
 
 	schedule, err := s.schedulesUC.CreateScheduledUC(payload)
 	if err != nil {
@@ -194,8 +199,8 @@ func (s *SchedulesController) UploadDocumentationHandler(c *gin.Context) {
 	}
 
 	// Define the file path to save the upload image.
-	uuid := uuid.New()
-	stringUUID := uuid.String()
+	fileUUID := uuid.New()
+	stringUUID := fileUUID.String()
 	path := fmt.Sprintf("./scheduleImages/%s", stringUUID+"-"+file.Filename)
 
 	// Save the uploaded image to the defined path

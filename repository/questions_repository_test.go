@@ -23,7 +23,6 @@ func (s *QuestionsRepositoryTestSuite) SetupTest() {
 }
 
 func (s *QuestionsRepositoryTestSuite) TestGet() {
-
 	s.mockSql.ExpectQuery("SELECT * FROM questions WHERE date = ?").
 		WithArgs("2022-01-01").
 		WillReturnRows(
@@ -40,6 +39,11 @@ func (s *QuestionsRepositoryTestSuite) TestUpdate() {
 func (s *QuestionsRepositoryTestSuite) TestDelete() {
 	s.mockSql.ExpectQuery("DELETE FROM questions WHERE id = ?").
 		WithArgs("1").
+		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "schedule_id", "description", "status", "created_at", "updated_at", "deleted_at"}).AddRow("1", "1", "1", "test", "PROCESS", nil, nil, nil))
+}
+func (s *QuestionsRepositoryTestSuite) TestCreate() {
+	s.mockSql.ExpectQuery("INSERT INTO questions (user_id, schedule_id, description, status) VALUES (?, ?, ?, ?)").
+		WithArgs("1", "1", "test", "PROCESS").
 		WillReturnRows(sqlmock.NewRows([]string{"id", "user_id", "schedule_id", "description", "status", "created_at", "updated_at", "deleted_at"}).AddRow("1", "1", "1", "test", "PROCESS", nil, nil, nil))
 }
 func TestQuestionsRepositoryTestSuite(t *testing.T) {

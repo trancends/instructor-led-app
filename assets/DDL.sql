@@ -52,3 +52,6 @@ ALTER TABLE questions ADD CONSTRAINT "questions_schedule_id_fkey" FOREIGN KEY (s
 ALTER TABLE questions ADD CONSTRAINT "questions_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE attendances ADD CONSTRAINT "attendances_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE attendances ADD CONSTRAINT "attendances_schedule_id_fkey" FOREIGN KEY (schedule_id) REFERENCES schedules(id);
+
+INSERT INTO users (name, email, password, role) VALUES
+('admin', 'admin@admin.com', 'admin', 'ADMIN');

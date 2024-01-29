@@ -1,5 +1,5 @@
 # use official Golang image
-FROM golang:1.21.2-alpine3.16 as build
+FROM golang:1.21.2-alpine3.18 AS build
 
 # set working directory
 WORKDIR /app
@@ -19,6 +19,8 @@ WORKDIR /app
 # Copy the binary from the build stage
 COPY --from=build /app/api .
 COPY --from=build /app/.env .
+
+RUN mkdir scheduleImages
 
 # Run the executable
 CMD ["./api"]

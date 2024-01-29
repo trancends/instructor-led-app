@@ -3,7 +3,7 @@ version: "3.9"
 services:
   go-app:
     container_name: go-app
-    image: trancends/expense-tracker:1.0.0
+    image: trancends/instructor-led-app
     build: .
     env_file:
       - .env
@@ -20,7 +20,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
       DATABASE_HOST: ${DB_HOST}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 

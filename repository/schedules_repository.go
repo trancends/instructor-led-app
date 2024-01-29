@@ -75,7 +75,7 @@ func (s *scheduleRepository) ListScheduleByRole(page int, size int, role string)
 	}
 
 	totalRows := 0
-	totalQuery := `SELECT COUNT(schedule_id) FROM schedules s JOIN users u ON s.user_id = u.id WHERE u.role = $1 AND s.deleted_at IS NULL`
+	totalQuery := `SELECT COUNT(id) FROM schedules s JOIN users u ON s.user_id = u.id WHERE u.role = $1 AND s.deleted_at IS NULL`
 	if err := s.db.QueryRow(totalQuery, role).Scan(&totalRows); err != nil {
 		log.Println("scheduleRepository.GetScheduleByRole select count:", err.Error())
 		return nil, sharedmodel.Paging{}, err

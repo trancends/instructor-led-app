@@ -1,4 +1,4 @@
-package repo_mock
+package repository_mock
 
 import (
 	"enigmaCamp.com/instructor_led/model"
@@ -38,6 +38,12 @@ func (q *QuestionRepositoryMock) Delete(id string) error {
 func (q *QuestionRepositoryMock) GetByID(id string) (model.Question, error) {
 	args := q.Called(id)
 	return args.Get(0).(model.Question), args.Error(1)
+}
+
+// GetByScheduleID
+func (q *QuestionRepositoryMock) GetByScheduleID(scheduleID string) ([]model.Question, error) {
+	args := q.Called(scheduleID)
+	return args.Get(0).([]model.Question), args.Error(1)
 }
 
 // List implements repository.QuestionsRepository.

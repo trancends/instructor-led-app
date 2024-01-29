@@ -20,18 +20,27 @@ func (q *QuestionUscaseMock) CreateQuestion(payload model.Question) (model.Quest
 	args := q.Called(payload)
 	return args.Get(0).(model.Question), args.Error(1)
 }
+
 func (q *QuestionUscaseMock) ListQuestions() ([]model.Question, error) {
 	args := q.Called()
 	return args.Get(0).([]model.Question), args.Error(1)
 }
+
+func (q *QuestionUscaseMock) ListQuestionsByScheduleID(scheduleID string) ([]model.Question, error) {
+	args := q.Called(scheduleID)
+	return args.Get(0).([]model.Question), args.Error(1)
+}
+
 func (q *QuestionUscaseMock) GetQuestion(date string) ([]*model.Schedule, error) {
 	args := q.Called(date)
 	return args.Get(0).([]*model.Schedule), args.Error(1)
 }
+
 func (q *QuestionUscaseMock) DeleteQuestion(id string) error {
 	args := q.Called(id)
 	return args.Error(0)
 }
+
 func (q *QuestionUscaseMock) UpdateQuestionStatus(payload model.Question) error {
 	args := q.Called(payload)
 	return args.Error(0)

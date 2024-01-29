@@ -4,12 +4,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"enigmaCamp.com/instructor_led/mock/middleware_mock"
 	"enigmaCamp.com/instructor_led/mock/usecase_mock"
 	"enigmaCamp.com/instructor_led/model"
-	sharedmodel "enigmaCamp.com/instructor_led/shared/shared_model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
 )
@@ -22,7 +20,6 @@ type QuestionsControllerSuite struct {
 }
 
 var (
-	currentTime      = time.Now()
 	expectedQuestion = model.Question{
 		ID:          "1",
 		UserID:      "1",
@@ -73,13 +70,6 @@ var (
 			UpdatedAt:   nil,
 			DeletedAt:   nil,
 		},
-	}
-
-	expectedPaging = sharedmodel.Paging{
-		Page:        1,
-		RowsPerPage: 10,
-		TotalRows:   len(expectedQuestions),
-		TotalPages:  0,
 	}
 )
 

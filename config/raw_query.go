@@ -18,7 +18,7 @@ const (
 	DeleteUser           = `UPDATE users SET deleted_at = $1 WHERE id = $2`
 
 	// Questions
-	InsertQuestions             = `INSERT INTO questions (id,schedule_id,description) VALUES ($1,$2,$3,'PROCESSED') RETURNING id`
+	InsertQuestions             = `INSERT INTO questions (user_id,schedule_id,description) VALUES ($1,$2,$3) RETURNING id`
 	SelectQuestionsByID         = `SELECT id, schedule_id, description, status FROM questions WHERE id = $1 AND deleted_at IS NULL`
 	SelectQuestionsByScheduleID = `SELECT id, schedule_id, description, status FROM questions WHERE schedule_id = $1 AND deleted_at IS NULL`
 	DeleteQuestions             = `UPDATE questions SET deleted_at = $1 WHERE id = $2`

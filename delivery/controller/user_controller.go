@@ -54,6 +54,11 @@ func (u *UserController) CreateUserHanlder(c *gin.Context) {
 		return
 	}
 
+	if user.Role == "ADMIN" {
+		common.SendErrorResponse(c, http.StatusBadRequest, "admin cannot be created")
+		return
+	}
+
 	user.Password, _ = utils.GetHashPassword(user.Password)
 	log.Println("calling user usecase CreateUser")
 	err := u.userUC.CreateUser(user)

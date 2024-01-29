@@ -41,8 +41,6 @@ var mockPaging = sharedmodel.Paging{
 	TotalPages:  1,
 }
 
-var mockData = []model.Schedule{expectedSchedule}
-
 type ScheduleUseCaseTestSuite struct {
 	suite.Suite
 	srm *repo_mock.ScheduleRepositoryMock
@@ -70,6 +68,7 @@ func (s *ScheduleUseCaseTestSuite) TestCreateScheduledUC_Fail() {
 }
 
 func (s *ScheduleUseCaseTestSuite) TestFindScheduleByRole_Success() {
+	mockData := []model.Schedule{expectedSchedule}
 	s.srm.On("ListScheduleByRole", mockPaging.Page, mockPaging.RowsPerPage, "admin").Return(mockData, mockPaging, nil)
 	actual, paging, err := s.suc.FindScheduleByRole(mockPaging.Page, mockPaging.RowsPerPage, "admin")
 	s.NoError(err)
@@ -87,6 +86,7 @@ func (s *ScheduleUseCaseTestSuite) TestFindScheduleByRole_Fail() {
 }
 
 func (s *ScheduleUseCaseTestSuite) TestFindAllScheduleUC_Success() {
+	mockData := []model.Schedule{expectedSchedule}
 	s.srm.On("ListScheduled", mockPaging.Page, mockPaging.RowsPerPage).Return(mockData, mockPaging, nil)
 	actual, paging, err := s.suc.FindAllScheduleUC(mockPaging.Page, mockPaging.RowsPerPage)
 	s.NoError(err)

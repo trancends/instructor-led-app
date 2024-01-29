@@ -92,6 +92,11 @@ func (s *SchedulesController) CreateScheduleHandler(c *gin.Context) {
 		common.SendErrorResponse(c, http.StatusBadRequest, "payload cannot be empty")
 		return
 	}
+	if s.schedulesUC == nil {
+		log.Println("SchedulesController.CreateScheduleHandler: schedulesUC is nil")
+		common.SendErrorResponse(c, http.StatusInternalServerError, "schedulesUC is nil")
+		return
+	}
 
 	schedule, err := s.schedulesUC.CreateScheduledUC(payload)
 	if err != nil {

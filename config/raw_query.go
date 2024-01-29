@@ -18,16 +18,18 @@ const (
 	DeleteUser           = `UPDATE users SET deleted_at = $1 WHERE id = $2`
 
 	// Questions
-	InsertQuestions     = `INSERT INTO questions (id,schedule_id,description) VALUES ($1,$2,$3,'PROCESSED') RETURNING id`
-	SelectQuestionsByID = `SELECT id, schedule_id, description, status FROM questions WHERE id = $1 AND deleted_at IS NULL`
-	DeleteQuestions     = `UPDATE questions SET deleted_at = $1 WHERE id = $2`
-	UpdateQuestions     = `UPDATE questions SET status = $1, updated_at = $2 WHERE id = $3`
+	InsertQuestions             = `INSERT INTO questions (id,schedule_id,description) VALUES ($1,$2,$3,'PROCESSED') RETURNING id`
+	SelectQuestionsByID         = `SELECT id, schedule_id, description, status FROM questions WHERE id = $1 AND deleted_at IS NULL`
+	SelectQuestionsByScheduleID = `SELECT id, schedule_id, description, status FROM questions WHERE schedule_id = $1 AND deleted_at IS NULL`
+	DeleteQuestions             = `UPDATE questions SET deleted_at = $1 WHERE id = $2`
+	UpdateQuestions             = `UPDATE questions SET status = $1, updated_at = $2 WHERE id = $3`
 
 	// Schedule
-	InsertSchedule     = `INSERT INTO schedules (user_id, date, start_time, end_time, documentation) VALUES ($1, $2, $3, $4, $5) RETURNING id,user_id, date, start_time, end_time, documentation`
-	SelectScheduleByID = `SELECT id, user_id, date, start_time, end_time, documentation FROM schedules WHERE id = $1`
-	DeleteSchedule     = `UPDATE schedules SET deleted_at = $1 WHERE id = $2`
-	UpdateScheduleDoc  = `UPDATE schedules SET documentation = $1, updated_at = $2 WHERE id = $3`
+	InsertSchedule       = `INSERT INTO schedules (user_id, date, start_time, end_time, documentation) VALUES ($1, $2, $3, $4, $5) RETURNING id,user_id, date, start_time, end_time, documentation`
+	SelectScheduleByID   = `SELECT id, user_id, date, start_time, end_time, documentation FROM schedules WHERE id = $1`
+	SelectScheduleByRole = `SELECT s.id, s.user_id, s.date, s.start_time, s.end_time, s.documentation FROM schedules s JOIN users u ON s.user_id = u.id WHERE u.role = $3 AND s.deleted_at IS NULL ORDER BY s.created_at DESC LIMIT $1 OFFSET $2`
+	DeleteSchedule       = `UPDATE schedules SET deleted_at = $1 WHERE id = $2`
+	UpdateScheduleDoc    = `UPDATE schedules SET documentation = $1, updated_at = $2 WHERE id = $3`
 
 	// Attendance
 	DeleteAttendance = `UPDATE attendances SET deleted_at = $1 WHERE id = $2`

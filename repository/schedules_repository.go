@@ -12,6 +12,7 @@ import (
 )
 
 type ScheduleRepository interface {
+	ListScheduleByRole(page int, size int, role string) ([]model.Schedule, sharedmodel.Paging, error)
 	ListScheduled(page int, size int) ([]model.Schedule, sharedmodel.Paging, error)
 	CreateScheduled(payload model.Schedule) (model.Schedule, error)
 	GetByID(id string) (model.Schedule, error)
@@ -49,6 +50,45 @@ func (s *scheduleRepository) CreateScheduled(payload model.Schedule) (model.Sche
 	}
 
 	return schedule, nil
+}
+
+// ListScheduleByRole implements ScheduleRepository.
+func (s *scheduleRepository) ListScheduleByRole(page int, size int, role string) ([]model.Schedule, sharedmodel.Paging, error) {
+	var schedules []model.Schedule
+	offset := (page - 1) * size
+	query := config.SelectScheduleByRole
+	rows, err := s.db.Query(query, size, offset, role)
+	if err != nil {
+		log.Println("scheduleRepository.Query:", err.Error())
+		return nil, sharedmodel.Paging{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var schedule model.Schedule
+		err := rows.Scan(&schedule.ID, &schedule.UserID, &schedule.Date, &schedule.StartTime, &schedule.EndTime, &schedule.Documentation)
+		if err != nil {
+			log.Println("scheduleRepository.Scan:", err.Error())
+			return nil, sharedmodel.Paging{}, err
+		}
+		schedules = append(schedules, schedule)
+	}
+
+	totalRows := 0
+	totalQuery := `SELECT COUNT(schedule_id) FROM schedules s JOIN users u ON s.user_id = u.id WHERE u.role = $1 AND s.deleted_at IS NULL`
+	if err := s.db.QueryRow(totalQuery, role).Scan(&totalRows); err != nil {
+		log.Println("scheduleRepository.GetScheduleByRole select count:", err.Error())
+		return nil, sharedmodel.Paging{}, err
+	}
+
+	paging := sharedmodel.Paging{
+		Page:        page,
+		RowsPerPage: size,
+		TotalRows:   totalRows,
+		TotalPages:  int(math.Ceil(float64(totalRows) / float64(size))),
+	}
+
+	return schedules, paging, nil
 }
 
 // List implements ParticipantRepository.

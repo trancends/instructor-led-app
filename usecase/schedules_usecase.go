@@ -12,6 +12,7 @@ import (
 )
 
 type ShecdulesUseCase interface {
+	FindScheduleByRole(page int, size int, role string) ([]model.Schedule, sharedmodel.Paging, error)
 	FindAllScheduleUC(page int, size int) ([]model.Schedule, sharedmodel.Paging, error)
 	CreateScheduledUC(payload model.Schedule) (model.Schedule, error)
 	FindByIDUC(id string) (model.Schedule, error)
@@ -31,6 +32,16 @@ func (s *schedulesUseCase) CreateScheduledUC(payload model.Schedule) (model.Sche
 		return schedule, err
 	}
 	return schedule, nil
+}
+
+// FindScheduleByRole implements ShcedulesUseCase.
+func (s *schedulesUseCase) FindScheduleByRole(page int, size int, role string) ([]model.Schedule, sharedmodel.Paging, error) {
+	schedules, paging, err := s.scheduleRepository.ListScheduleByRole(page, size, role)
+	if err != nil {
+		log.Println("schedulesUseCase.FindScheduleByRole:", err.Error())
+		return nil, sharedmodel.Paging{}, err
+	}
+	return schedules, paging, nil
 }
 
 // FindAllScheduleUC implements ShecdulesUseCase.

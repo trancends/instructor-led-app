@@ -7,7 +7,7 @@ CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL ,
-    password VARCHAR(50) NOT NULL,
+    password TEXT NOT NULL,
     role role_type NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
